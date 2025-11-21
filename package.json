@@ -1,0 +1,32 @@
+{
+	"name": "onion",
+	"version": "1.0.0",
+	"main": "index.js",
+	"devDependencies": {
+		"@cucumber/cucumber": "^11.0.1",
+		"@playwright/test": "^1.50.0",
+		"@types/node": "^22.1.0",
+		"cucumber-html-reporter": "^6.0.0",
+		"npm-run-all": "^4.1.5"
+	},
+	"scripts": {
+		"test1": "cucumber-js --config=config/cucumber.js --format json:./reports/cucumber_report.json",
+		"test2": "node updateTestResults.js",
+		"test": "npm-run-all --continue-on-error test1 test2"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"dependencies": {
+		"@cucumber/cucumber": "^10.8.0",
+		"chai": "^5.1.1",
+		"csv-parser": "^3.0.0",
+		"dotenv": "^16.4.5",
+		"handlebars": "^4.7.8",
+		"minami": "^1.2.3",
+		"node-fetch": "^3.3.2",
+		"taffydb": "^2.7.3",
+		"uuid": "^10.0.0"
+	}
+}

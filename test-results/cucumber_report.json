@@ -1,0 +1,90 @@
+[
+  {
+    "description": "",
+    "elements": [
+      {
+        "description": "",
+        "id": "create-design-functionality-available-for-admin-user;login-into-iqgeo-as-admin-user",
+        "keyword": "Scenario",
+        "line": 3,
+        "name": "Login into IQGEO as ADMIN USER",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 2018700
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "Commns Application is Opened as an Admin User",
+            "match": {
+              "location": "src\\test\\bookmark\\design.js:27"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 561096399
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 5,
+            "name": "User selects create bookmark",
+            "match": {
+              "location": "src\\test\\bookmark\\design.js:41"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 6816136599
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 6,
+            "name": "User adding pole to existing design",
+            "match": {
+              "location": "src\\test\\Comms\\design.js:47"
+            },
+            "result": {
+              "status": "failed",
+              "duration": 1779302099,
+              "error_message": "page.evaluate: Error: Point is outside the polygon bounds.\n    at eval (eval at evaluate (:226:30), <anonymous>:60:11)\n    at UtilityScript.evaluate (<anonymous>:228:17)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at eval (:226:30)\n    at UtilityScript.evaluate (<anonymous>:228:17)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at CommsApp.addPoletoDesgin (D:\\repo\\onion\\onion\\pages\\apps\\standard.js:111:19)\n    at async World.<anonymous> (D:\\repo\\onion\\onion\\src\\test\\Comms\\design.js:55:3)"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@Comms",
+            "line": 1
+          },
+          {
+            "name": "@smoke",
+            "line": 1
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "id": "create-design-functionality-available-for-admin-user",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Create Design Functionality available for Admin User",
+    "tags": [
+      {
+        "name": "@Comms",
+        "line": 1
+      },
+      {
+        "name": "@smoke",
+        "line": 1
+      }
+    ],
+    "uri": "src\\test\\Comms\\design.feature"
+  }
+]
