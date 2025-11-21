@@ -2,8 +2,17 @@ name: Test Client Repo B
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [trigger_workflow]
+    inputs:
+      request_id:         # 👈 Required for DB correlation
+        description: "Unique request ID for tracking"
+        required: true
+      testRunId:
+        description: "Test run ID (optional)"
+        required: false
+      tags:
+        description: "Tags to filter tests (optional)"
+        required: false
+        default: ""
 
 jobs:
   test:
