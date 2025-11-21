@@ -13,7 +13,7 @@ const JIRA_PROJECT_KEY = 'TPI4';
 const GIT_WORKFLOW_URL =
 	'https://api.github.com/repos/gnapi-vinoth/onion/dispatches';
 
-const GIT_AUTHERISATION_TOKEN = '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';
+// const GIT_AUTHERISATION_TOKEN = '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';
 
 module.exports = {
 	IQGEO_USERNAME,
