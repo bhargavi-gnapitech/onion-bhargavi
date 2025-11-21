@@ -1,0 +1,15 @@
+const { expect } = require('@playwright/test');
+
+class GnapiMapUtils{
+
+
+	
+  
+
+    
+
+
+}
+
+
+module.exports = { GnapiMapUtils};

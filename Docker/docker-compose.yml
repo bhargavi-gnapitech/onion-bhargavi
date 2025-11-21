@@ -1,0 +1,65 @@
+services:
+    # Node.js service
+    server:
+        build:
+            context: ../onion-backend
+            # dockerfile: onion-backend/Docker/dockerfile
+
+        ports:
+            - '3000:3000'
+        depends_on:
+            - db
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_HOST=db
+            - POSTGRES_DB=onion_db
+            - POSTGRES_PASSWORD=pradeep33
+            - POSTGRES_PORT=5432
+        # volumes:
+        #     - ../onion-backend:/usr/src/app # Mount the local directory
+        #     - /usr/src/app/node_modules
+        # command: nodemon index.js
+
+        # Frontend React service
+    frontend:
+        build:
+            context: ../onion-frontend
+            # dockerfile: onion-frontend/dockerfile
+        ports:
+            - '4000:4000' # Change port mapping to 4000
+        depends_on:
+            - server
+        environment:
+            - REACT_APP_API_URL=http://localhost:3000
+        volumes:
+            - ../onion-frontend:/usr/src/app # Mount the local directory
+            - /usr/src/app/node_modules
+
+        env_file:
+            - ../onion-frontend/.env # Load environment variables from .env file
+
+    # PostgreSQL database service
+    db:
+        image: postgres:13
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: pradeep33
+            POSTGRES_DB: onion_db
+        ports:
+            - '5432:5432'
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+    # PgAdmin service
+    pgadmin:
+        image: dpage/pgadmin4
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@admin.com
+            PGADMIN_DEFAULT_PASSWORD: admin
+        ports:
+            - '8080:80'
+        depends_on:
+            - db
+
+volumes:
+    postgres_data:
