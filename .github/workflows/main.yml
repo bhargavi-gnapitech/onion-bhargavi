@@ -21,6 +21,16 @@ jobs:
             - name: Set Commit Author as Environment Variable
               run: echo "COMMIT_AUTHOR=${{ github.event.client_payload.commit_author }}" >> $GITHUB_ENV
 
+            - name: Install Dependencies
+              run: npm install
+
+            - name: Install npm-run-all
+              run: npm install npm-run-all --save-dev
+
+            - name: Install Playwright Browsers
+              run: npx playwright install --with-deps
+
+
             # Step 4: Run the tests
             - name: Run Tests on ${{ github.event.client_payload.branch }}
               run: |
