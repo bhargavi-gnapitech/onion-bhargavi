@@ -6,9 +6,9 @@ on:
       request_id:         # 👈 Required for DB correlation
         description: "Unique request ID for tracking"
         required: true
-      # testRunId:
-      #   description: "Test run ID (optional)"
-      #   required: false
+      testRunId:
+        description: "Test run ID (optional)"
+        required: false
       tags:
         description: "Tags to filter tests (optional)"
         required: false
