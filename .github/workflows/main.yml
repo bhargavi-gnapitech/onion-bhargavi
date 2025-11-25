@@ -1,91 +1,83 @@
-name: Test Client Repo
+name: Test Client Repo B
 
 on:
-    # push:
-    #     branches:
-    #         - main
-    workflow_dispatch: # To manually trigger the workflow if needed
-    repository_dispatch:
-        types: [trigger_workflow]
+  workflow_dispatch:
+    inputs:
+      request_id:         # 👈 Required for DB correlation
+        description: "Unique request ID for tracking"
+        required: true
+      testRunId:
+        description: "Test run ID (optional)"
+        required: false
+      tags:
+        description: "Tags to filter tests (optional)"
+        required: false
+        default: ""
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-        steps:
-            # Step 1: Check out your repository
-            - name: Checkout Your Repo
-              uses: actions/checkout@v4
-              with:
-                  ref: ${{ github.event.client_payload.branch }}
-            - name: Set Commit Author as Environment Variable
-              run: echo "COMMIT_AUTHOR=${{ github.event.client_payload.commit_author }}" >> $GITHUB_ENV
+    steps:
+      # Checkout
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.branch }}
 
-            # Step 4: Run the tests
-            - name: Run Tests on ${{ github.event.client_payload.branch }}
-              run: |
-                  npm test
-              env:
-                  npm_config_TAGS: ${{ github.event.client_payload.tags }}
-                  COMMIT_AUTHOR: ${{ github.event.client_payload.commit_author }} # Pass it here as well
+      # Set commit author
+      - name: Set Commit Author
+        run: echo "COMMIT_AUTHOR=${{ github.event.client_payload.commit_author }}" >> $GITHUB_ENV
 
-            # Step 4: Generate HTML Report
-            # - name: hit api seperately
-            #   run: |
-            #       node .\updateTestResults.js
-            # or any test script you want to run
-            # Optional: Step 5: Upload test results (optional)
-            - name: Upload Test Results
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: test-results
-                  path: reports/cucumber_report.json # Adjust the path as per your test result directory
+      # Install deps once
+      - name: Install Dependencies
+        run: npm ci
 
-            - name: Upload HTML Report
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: cucumber-report
-                  path: reports/cucumber_report.html
+      # Install npm-run-all
+      - name: Install npm-run-all
+        run: npm install npm-run-all --save-dev
 
-            # After generating test results
-            - name: Update Test Results
-              run: |
+      # Install Playwright with browsers
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
 
-                  REPORT_CONTENT=$(jq -c . reports/cucumber_report.json)
+      # Run tests
+      - name: Run Tests
+        run: npm test
+        env:
+          npm_config_TAGS: ${{ github.event.client_payload.tags }}
+          COMMIT_AUTHOR: ${{ github.event.client_payload.commit_author }}
 
-                  echo "$REPORT_CONTENT"
+      # Upload JSON report
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: reports/cucumber_report.json
 
-                  # Store the data in a file (if REPORT_CONTENT is too large)
-                  echo "{\"commit_id\": \"${{ github.event.client_payload.commit_hash }}\", \"test_results\": $REPORT_CONTENT}" > report_payload.json
+      # Upload HTML report
+      - name: Upload HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report
+          path: reports/cucumber_report.html
 
-                  # Send the report content with the commit hash to the webhook
-                  curl -v -X PUT https://onionserver.gnapi.tech/webhook/update \
-                    -H "Content-Type: application/json" \
-                    --data-binary @report_payload.json
+      # Update results to backend
+      - name: Update Test Results to Server
+        run: |
+          REPORT_CONTENT=$(jq -c . reports/cucumber_report.json)
+          echo "{\"commit_id\": \"${{ github.event.client_payload.commit_hash }}\", \"test_results\": $REPORT_CONTENT}" > report_payload.json
+          curl -v -X PUT https://onionserver.gnapi.tech/webhook/update \
+            -H "Content-Type: application/json" \
+            --data-binary @report_payload.json
 
-
-            # Step 3: Install dependencies (if necessary)
-            - name: Install Dependencies
-              run: |
-
-                  npm install  # or any other package manager like yarn or pip, depending on the project
-
-            - name: Install dependencies
-              run: npm ci
-            - name: Install Playwright Browsers
-              run: npx playwright install --with-deps
-
-            - name: Install cucumber
-              run: npm install @cucumber/cucumber --save-dev
-
-            - name: Display Commit Details
-              run: |
-                  echo "Branch: ${{ github.event.client_payload.branch }}"
-                  echo "Tags: ${{ github.event.client_payload.tags }}"
-                  echo "Commit Message: ${{ github.event.client_payload.commit_message }}"
-                  echo "Commit Author: ${{ github.event.client_payload.commit_author }}"
-                  echo "Commit Hash: ${{ github.event.client_payload.commit_hash }}"
-
-            # Set commit_author as an environment variable
+      # Display commit details
+      - name: Display Commit Details
+        run: |
+          echo "Branch: ${{ github.event.client_payload.branch }}"
+          echo "Tags: ${{ github.event.client_payload.tags }}"
+          echo "Commit Message: ${{ github.event.client_payload.commit_message }}"
+          echo "Commit Author: ${{ github.event.client_payload.commit_author }}"
+          echo "Commit Hash: ${{ github.event.client_payload.commit_hash }}"
