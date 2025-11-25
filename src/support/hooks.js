@@ -157,15 +157,15 @@ After({ timeout: 20000 }, async function (scenario) {
 			video ? 'Recorded' : 'Not recorded'
 		);
 
-		const videoPath = video ? await video.path() : null;
+		// const videoPath = video ? await video.path() : null;
 
-		if (videoPath) {
-			console.log(`Video recorded at: ${videoPath}`);
-			const videoBuffer = fs.readFileSync(videoPath);
-			await this.attach(videoBuffer, 'video/webm');
-		} else {
-			console.log('No video recorded for this test.');
-		}
+		// if (videoPath) {
+		// 	console.log(`Video recorded at: ${videoPath}`);
+		// 	const videoBuffer = fs.readFileSync(videoPath);
+		// 	await this.attach(videoBuffer, 'video/webm');
+		// } else {
+		// 	console.log('No video recorded for this test.');
+		// }
 
 		await global.page.close(); // Ensures the video is saved
 

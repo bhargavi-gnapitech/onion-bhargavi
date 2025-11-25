@@ -7,14 +7,14 @@
            browser = await chromium.launch({ headless: false });
            const context = await browser.newContext();
            page = await context.newPage();
-           await page.goto('http://localhost:8083/iqgeo');
+           await page.goto('https://dev2.neon.iqgeo.cloud/iqgeo_dev/login');
          });
 
   
 
          When('User clicks on Comms application', { timeout: 60000 },async function () {
-          await page.fill('input#login-user', 'admin');
-          await page.fill('input#login-pass', '_mywWorld_');
+          await page.fill('input#login-user', 'sunaina');
+          await page.fill('input#login-pass', 'iqgeo');
           await page.click('#login-submission');
          });
 

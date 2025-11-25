@@ -11,10 +11,10 @@ const GIT_WORKFLOW_URL =
 
 const GIT_AUTHERISATION_TOKEN = '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';
 
-// const ONION_BACKEND_Domain =
-// 	'https://onionserver.gnapi.tech' ||
-// 	'https://www.onionserver.gnapi.tech' ||
-// 	'http://localhost:3000';
+const ONION_BACKEND_Domain =
+	'https://dev.api.onion.gnapitech.org' 
+	// 'https://www.onionserver.gnapi.tech' 
+	// 'http://localhost:3000';
 
 module.exports = {
 	JIRA_BASE_URL,
