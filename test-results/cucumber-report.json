@@ -4,17 +4,17 @@
     "elements": [
       {
         "description": "",
-        "id": "regression-test-suite-for-gigapower;verify-github-integration-is-working-fine",
+        "id": "regression-test-suite-for-gigapower;verify-logout-functionality-is-working-fine",
         "keyword": "Scenario",
-        "line": 660,
-        "name": "Verify GitHub integration is working fine",
+        "line": 668,
+        "name": "Verify logout functionality is working fine",
         "steps": [
           {
             "keyword": "Before",
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 2934700
+              "duration": 1712400
             }
           },
           {
@@ -22,46 +22,33 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 1742378900
+              "duration": 152657400
             }
           },
           {
             "arguments": [],
             "keyword": "Given ",
-            "line": 661,
-            "name": "User Network Manager application",
+            "line": 669,
+            "name": "User is logged in Network Manager application",
             "match": {
-              "location": "src\\test\\gigapower\\steps\\githubVerify.js:6"
+              "location": "src\\test\\gigapower\\steps\\verifylogout.js:7"
             },
             "result": {
               "status": "passed",
-              "duration": 3612032798
+              "duration": 3443858299
             }
           },
           {
             "arguments": [],
             "keyword": "When ",
-            "line": 662,
-            "name": "User clicks on Comms application",
+            "line": 670,
+            "name": "User clicks on logout button.",
             "match": {
-              "location": "src\\test\\gigapower\\steps\\githubVerify.js:15"
+              "location": "src\\test\\gigapower\\steps\\verifylogout.js:19"
             },
             "result": {
               "status": "passed",
-              "duration": 1011104299
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 663,
-            "name": "Clicks on logout button.",
-            "match": {
-              "location": "src\\test\\gigapower\\steps\\githubVerify.js:22"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 489120199
+              "duration": 1408886598
             }
           },
           {
@@ -69,11 +56,11 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 789746999
+              "duration": 385633600
             },
             "embeddings": [
               {
-                "data": "VVVJRDogYmMwZWY2Y2EtYjFmOS00OWE5LWFjNTgtY2U5MjI1YjkyNmNh",
+                "data": "VVVJRDogYjI2YTc0MTEtZWFmMy00ZDViLTkxNDktNjJjMDBkNTE3MTg4",
                 "mime_type": "text/plain"
               },
               {
@@ -89,8 +76,8 @@
             "line": 1
           },
           {
-            "name": "@githubVerify",
-            "line": 659
+            "name": "@verifylogout",
+            "line": 667
           }
         ],
         "type": "scenario"

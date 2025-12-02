@@ -661,6 +661,13 @@ Scenario: Verify GitHub integration is working fine
    Given User Network Manager application
    When User clicks on Comms application
    And Clicks on logout button.
+
+################################################################################################################################################
+
+@verifylogout
+Scenario: Verify logout functionality is working fine
+   Given User is logged in Network Manager application
+   When User clicks on logout button.
   
      
 
