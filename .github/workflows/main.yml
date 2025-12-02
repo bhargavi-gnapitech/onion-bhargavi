@@ -23,11 +23,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.client_payload.branch }}
+          ref: ${{ github.event.inputs.branch }}
 
       # Set commit author
       - name: Set Commit Author
-        run: echo "COMMIT_AUTHOR=${{ github.event.client_payload.commit_author }}" >> $GITHUB_ENV
+        run: echo "COMMIT_AUTHOR=${{ github.event.inputs.commit_author }}" >> $GITHUB_ENV
 
       # Install deps once
       - name: Install Dependencies
@@ -45,8 +45,8 @@ jobs:
       - name: Run Tests
         run: npm test
         env:
-          npm_config_TAGS: ${{ github.event.client_payload.tags }}
-          COMMIT_AUTHOR: ${{ github.event.client_payload.commit_author }}
+          npm_config_TAGS: ${{ github.event.inputs.tags }}
+          COMMIT_AUTHOR: ${{ github.event.inputs.commit_author }}
 
       # Upload JSON report
       - name: Upload Test Results
@@ -68,7 +68,7 @@ jobs:
       - name: Update Test Results to Server
         run: |
           REPORT_CONTENT=$(jq -c . reports/cucumber_report.json)
-          echo "{\"commit_id\": \"${{ github.event.client_payload.commit_hash }}\", \"test_results\": $REPORT_CONTENT}" > report_payload.json
+          echo "{\"commit_id\": \"${{ github.event.inputs.commit_hash }}\", \"test_results\": $REPORT_CONTENT}" > report_payload.json
           curl -v -X PUT https://onionserver.gnapi.tech/webhook/update \
             -H "Content-Type: application/json" \
             --data-binary @report_payload.json
@@ -76,8 +76,8 @@ jobs:
       # Display commit details
       - name: Display Commit Details
         run: |
-          echo "Branch: ${{ github.event.client_payload.branch }}"
-          echo "Tags: ${{ github.event.client_payload.tags }}"
-          echo "Commit Message: ${{ github.event.client_payload.commit_message }}"
-          echo "Commit Author: ${{ github.event.client_payload.commit_author }}"
-          echo "Commit Hash: ${{ github.event.client_payload.commit_hash }}"
+          echo "Branch: ${{ github.event.inputs.branch }}"
+          echo "Tags: ${{ github.event.inputs.tags }}"
+          echo "Commit Message: ${{ github.event.inputs.commit_message }}"
+          echo "Commit Author: ${{ github.event.inputs.commit_author }}"
+          echo "Commit Hash: ${{ github.event.inputs.commit_hash }}"
