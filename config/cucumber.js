@@ -48,7 +48,8 @@ module.exports = {
 
 		// Read tags passed from npm, example:
 		// npm run test --TAGS="@tag1 or @tag2"
-		tags: process.env.npm_config_TAGS || "",
+		// tags: process.env.npm_config_TAGS || "",
+		tags: process.env.npm_config_TAGS? process.env.npm_config_TAGS.split(',').join(' or ') : "",
 
 		// Feature file locations
 		paths: ['src/test/gigapower/**/*.feature'],
@@ -100,4 +101,4 @@ module.exports = {
 };
 
 // Print tag used for debugging
-console.log("Using tag:", process.env.npm_config_TAGS);
+console.log("Using tag: dffsad", process.env.npm_config_TAGS);
