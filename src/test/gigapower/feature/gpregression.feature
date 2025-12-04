@@ -37,7 +37,7 @@ Scenario:User should be able to create new PSA ticket under Projects Tab.
 
 #############################################################################################
 
-  @gploginWithValid
+  @gploginwithvalid
   Scenario: User should be able to login with valid username and valid password
      Given User Opens the "IQGeo URL"
      When User inputs valid "username" and "password"
