@@ -10,7 +10,7 @@ let page, browser,GigaPower,login;
             await global.page.goto("https://uat.neon.iqgeo.cloud");
             login = new LoginPage(global.page);
             await login.login("automation", "iqgeo");
-           
+            
          });
 
   

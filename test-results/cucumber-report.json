@@ -4,17 +4,17 @@
     "elements": [
       {
         "description": "",
-        "id": "regression-test-suite-for-gigapower;verify-github-integration-is-working-fine",
+        "id": "regression-test-suite-for-gigapower;verify-construction-admin-application-is-loading-fine",
         "keyword": "Scenario",
-        "line": 660,
-        "name": "Verify GitHub integration is working fine",
+        "line": 674,
+        "name": "Verify Construction Admin application is loading fine",
         "steps": [
           {
             "keyword": "Before",
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 1582899
+              "duration": 2181299
             }
           },
           {
@@ -22,46 +22,46 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 150664200
+              "duration": 149413400
             }
           },
           {
             "arguments": [],
             "keyword": "Given ",
-            "line": 661,
-            "name": "User Network Manager application",
+            "line": 675,
+            "name": "User was logged in Network Manager application",
             "match": {
-              "location": "src\\test\\gigapower\\steps\\githubVerify.js:6"
+              "location": "src\\test\\gigapower\\steps\\constructAdmin.js:7"
             },
             "result": {
               "status": "passed",
-              "duration": 5938428999
+              "duration": 2480832898
             }
           },
           {
             "arguments": [],
             "keyword": "When ",
-            "line": 662,
-            "name": "User clicks on Comms application",
+            "line": 676,
+            "name": "User clicks on Construction Admin application",
             "match": {
-              "location": "src\\test\\gigapower\\steps\\githubVerify.js:15"
+              "location": "src\\test\\gigapower\\steps\\constructAdmin.js:16"
             },
             "result": {
               "status": "passed",
-              "duration": 878855698
+              "duration": 813694999
             }
           },
           {
             "arguments": [],
-            "keyword": "And ",
-            "line": 663,
-            "name": "Clicks on logout button.",
+            "keyword": "Then ",
+            "line": 677,
+            "name": "Construction Admin application is loaded successfully.",
             "match": {
-              "location": "src\\test\\gigapower\\steps\\githubVerify.js:22"
+              "location": "src\\test\\gigapower\\steps\\constructAdmin.js:24"
             },
             "result": {
               "status": "passed",
-              "duration": 58776799
+              "duration": 1173629399
             }
           },
           {
@@ -69,11 +69,11 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 426893899
+              "duration": 419744200
             },
             "embeddings": [
               {
-                "data": "VVVJRDogYWE3OTk2OTktYTU5Zi00ZDUxLTljNTAtNGE1NzU5NTRhMWY3",
+                "data": "VVVJRDogNGM0MjNhMWMtNTUxMC00Zjc4LWJmZTItMDJjMWM3ZGNhZDkx",
                 "mime_type": "text/plain"
               },
               {
@@ -89,12 +89,8 @@
             "line": 1
           },
           {
-            "name": "@githubVerify",
-            "line": 659
-          },
-          {
-            "name": "@smoke",
-            "line": 659
+            "name": "@constructAdmin",
+            "line": 673
           }
         ],
         "type": "scenario"
