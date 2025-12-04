@@ -656,7 +656,7 @@ Scenario:User should be able to create new PSA ticket under Projects Tab.
 
 ################################################################################################################################################
 
-@githubVerify
+@githubVerify @smoke
 Scenario: Verify GitHub integration is working fine
    Given User Network Manager application
    When User clicks on Comms application
