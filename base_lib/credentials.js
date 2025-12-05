@@ -1,6 +1,6 @@
 const ENV_URLS = {
-    DEV: 'https://dev2.neon.iqgeo.cloud/iqgeo_72',
-    UAT: 'http://localhost:8083/iqgeo',
+    DEV: 'https://dev2.neon.iqgeo.cloud/iqgeo_dev/',
+    UAT: 'https://dev2.neon.iqgeo.cloud/iqgeo_dev/',
   };
   
   const IQGEO_USERNAME = 'admin';

@@ -1,44 +1,4 @@
-// module.exports = {
-// 	default: {
-// 		'world-parameters': {
-// 			baseURL: 'https://dev2.neon.iqgeo.cloud/pre-uat/login',
-// 		},
-// 		tags: process.env.npm_config_TAGS,
-// 		formatOptions: {
-// 			snippetInterface: 'async-await',
-// 		},
-// 		paths: ['src/test/gigapower/**/*.feature'],
 
-// 		dryRun: false,
-// 		require: ['src/test/gigapower/**/*.js', 'src/support/hooks.js'],
-
-// 		format: [
-// 			'progress-bar',
-// 			'html:test-results/cucumber-report.html',
-// 			'json:test-results/cucumber-report.json',
-// 			'rerun:@rerun.txt',
-// 		],
-// 		parallel: 2,
-// 	},
-// 	rerun: {
-// 		formatOptions: {
-// 			snippetInterface: 'async-await',
-// 		},
-
-// 		dryRun: false,
-// 		require: ['src/test/**/*.js', 'src/hooks/hooks.js'],
-
-// 		format: [
-// 			'progress-bar',
-// 			'html:test-results/cucumber-report.html',
-// 			'json:test-results/cucumber-report.json',
-// 			'rerun:@rerun.txt',
-// 		],
-// 		parallel: 2,
-// 	},
-// };
-
-// console.log('Using tag:', process.env.npm_config_TAGS); // Add this to verify the tag
 module.exports = {
 	default: {
 		// World parameters
@@ -52,11 +12,11 @@ module.exports = {
 		tags: process.env.npm_config_TAGS? process.env.npm_config_TAGS.split(',').join(' or ') : "",
 
 		// Feature file locations
-		paths: ['src/test/gigapower/**/*.feature'],
+		paths: ['src/test/IQGeo/**/*.feature'],
 
 		// Step definitions + hooks
 		require: [
-			'src/test/gigapower/**/*.js',
+			'src/test/IQGeo/steps/**/*.js',
 			'src/support/hooks.js',
 		],
 
@@ -81,7 +41,7 @@ module.exports = {
 		paths: ['@rerun.txt'],
 
 		require: [
-			'src/test/**/*.js',
+			'src/test/IQGeo/steps/**/*.js',
 			'src/support/hooks.js',
 		],
 

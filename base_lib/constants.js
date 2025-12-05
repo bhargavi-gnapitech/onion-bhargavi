@@ -1,6 +1,6 @@
-const IQGEO_USERNAME = 'automation';
+const IQGEO_USERNAME = 'sunaina';
 const IQGEO_PASSWORD = 'iqgeo';
-const BASE_URL = 'http://localhost:8083/iqgeo';                         //https://uat.neon.iqgeo.cloud
+const BASE_URL = 'https://dev2.neon.iqgeo.cloud/iqgeo_dev/';                         //https://uat.neon.iqgeo.cloud
 
 // JIRA DETAILS
 const JIRA_BASE_URL = 'https://gnapi-ticketspi.atlassian.net';

@@ -6,7 +6,7 @@
          let page;
          Given('User log in Network Manager application',{ timeout: 60000 }, async function () {
             browser = await chromium.launch({ headless: true });
-            const context = await browser.newContext();
+            //const context = await browser.newContext();
             page = await context.newPage();
             await page.goto('https://dev2.neon.iqgeo.cloud/iqgeo_dev/login');
          });

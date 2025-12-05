@@ -4,106 +4,9 @@
     "elements": [
       {
         "description": "",
-        "id": "regression-test-suite-for-gigapower;verify-github-integration-is-working-fine",
-        "keyword": "Scenario",
-        "line": 660,
-        "name": "Verify GitHub integration is working fine",
-        "steps": [
-          {
-            "keyword": "Before",
-            "hidden": true,
-            "result": {
-              "status": "passed",
-              "duration": 1591299
-            }
-          },
-          {
-            "keyword": "Before",
-            "hidden": true,
-            "result": {
-              "status": "passed",
-              "duration": 206339900
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 661,
-            "name": "User Network Manager application",
-            "match": {
-              "location": "src\\test\\gigapower\\steps\\githubVerify.js:6"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 5484190200
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "When ",
-            "line": 662,
-            "name": "User clicks on Comms application",
-            "match": {
-              "location": "src\\test\\gigapower\\steps\\githubVerify.js:15"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 2751186998
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 663,
-            "name": "Clicks on logout button.",
-            "match": {
-              "location": "src\\test\\gigapower\\steps\\githubVerify.js:22"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 82765399
-            }
-          },
-          {
-            "keyword": "After",
-            "hidden": true,
-            "result": {
-              "status": "passed",
-              "duration": 618567299
-            },
-            "embeddings": [
-              {
-                "data": "VVVJRDogMDQ2Njg2ZWQtZTk0Ni00YmQ5LTliMWMtZWMzOWM3YWViMjE5",
-                "mime_type": "text/plain"
-              },
-              {
-                "data": "iVBORw0KGgoAAAANSUhEUgAABQAAAALQCAIAAABAH0oBAAAQAElEQVR4nOzXQQEAMAgAIR/2r+x67KAFe3cDAAAAv9sBAACAAAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQYAgAIBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAdsBD6AAAAEZJREFUIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgIQHAAD//93CXf0AAAAGSURBVAMAkKsOPoHtCG4AAAAASUVORK5CYII=",
-                "mime_type": "image/png"
-              }
-            ]
-          }
-        ],
-        "tags": [
-          {
-            "name": "@regression",
-            "line": 1
-          },
-          {
-            "name": "@githubVerify",
-            "line": 659
-          },
-          {
-            "name": "@smoke",
-            "line": 659
-          }
-        ],
-        "type": "scenario"
-      },
-      {
-        "description": "",
         "id": "regression-test-suite-for-gigapower;verify-logout-functionality-is-working-fine",
         "keyword": "Scenario",
-        "line": 668,
+        "line": 12,
         "name": "Verify logout functionality is working fine",
         "steps": [
           {
@@ -111,7 +14,7 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 1409800
+              "duration": 1490300
             }
           },
           {
@@ -119,33 +22,33 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 212294999
+              "duration": 380084400
             }
           },
           {
             "arguments": [],
             "keyword": "Given ",
-            "line": 669,
+            "line": 13,
             "name": "User is logged in Network Manager application",
             "match": {
-              "location": "src\\test\\gigapower\\steps\\verifylogout.js:7"
+              "location": "src\\test\\IQGeo\\steps\\verifylogout.js:7"
             },
             "result": {
               "status": "passed",
-              "duration": 8206276699
+              "duration": 3700471798
             }
           },
           {
             "arguments": [],
             "keyword": "When ",
-            "line": 670,
+            "line": 14,
             "name": "User clicks on logout button.",
             "match": {
-              "location": "src\\test\\gigapower\\steps\\verifylogout.js:19"
+              "location": "src\\test\\IQGeo\\steps\\verifylogout.js:19"
             },
             "result": {
               "status": "passed",
-              "duration": 1904245799
+              "duration": 1362081900
             }
           },
           {
@@ -153,11 +56,11 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 523210900
+              "duration": 683608600
             },
             "embeddings": [
               {
-                "data": "VVVJRDogY2ZkYWRiY2UtYTljZi00MGVlLTliZTMtNjI0MGUyMWExNDQ1",
+                "data": "VVVJRDogYTQ5MzE4OTMtNDJiNi00OWVhLWE1MDQtMGRmYmNjZDgzMDJk",
                 "mime_type": "text/plain"
               },
               {
@@ -169,12 +72,12 @@
         ],
         "tags": [
           {
-            "name": "@regression",
+            "name": "@regression1",
             "line": 1
           },
           {
             "name": "@verifylogout",
-            "line": 667
+            "line": 11
           }
         ],
         "type": "scenario"
@@ -186,10 +89,10 @@
     "name": "Regression Test Suite for Gigapower",
     "tags": [
       {
-        "name": "@regression",
+        "name": "@regression1",
         "line": 1
       }
     ],
-    "uri": "src\\test\\gigapower\\feature\\gpregression.feature"
+    "uri": "src\\test\\IQGeo\\feature\\gig.feature"
   }
 ]
