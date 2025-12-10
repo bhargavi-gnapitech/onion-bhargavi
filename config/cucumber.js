@@ -12,11 +12,11 @@ module.exports = {
 		tags: process.env.npm_config_TAGS? process.env.npm_config_TAGS.split(',').join(' or ') : "",
 
 		// Feature file locations
-		paths: ['src/test/IQGeo/**/*.feature'],
+		paths: ['src/test/Onion/**/*.feature'],
 
 		// Step definitions + hooks
 		require: [
-			'src/test/IQGeo/steps/**/*.js',
+			'src/test/Onion/steps/**/*.js',
 			'src/support/hooks.js',
 		],
 
@@ -41,7 +41,7 @@ module.exports = {
 		paths: ['@rerun.txt'],
 
 		require: [
-			'src/test/IQGeo/steps/**/*.js',
+			'src/test/Onion/steps/**/*.js',
 			'src/support/hooks.js',
 		],
 
