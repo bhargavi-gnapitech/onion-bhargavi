@@ -22,14 +22,13 @@
 
          When('the user clicks on the Login button',{ timeout: 60000 }, async function () {
             await page.click("#kc-login");
-            //Assertion can be added here to verify successful login
-            const todayHeading = this.page.locator('//h4[text()="Today"]');
-            await expect(todayHeading).toBeVisible(); 
-            
+           
          });
 
   
 
          Then('the user should be navigated to the Dashboard page',{ timeout: 60000 }, async function () {
-         
+            //Assertion can be added here to verify successful login
+            const todayHeading = this.page.locator('//h4[text()="Today"]');
+            await expect(todayHeading).toBeVisible();
          });

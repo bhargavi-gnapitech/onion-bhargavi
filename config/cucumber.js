@@ -3,7 +3,7 @@ module.exports = {
 	default: {
 		// World parameters
 		'world-parameters': {
-			baseURL: 'https://dev2.neon.iqgeo.cloud/pre-uat/login',
+			baseURL: 'https://dev.onion.gnapitech.org',
 		},
 
 		// Read tags passed from npm, example:
@@ -61,4 +61,4 @@ module.exports = {
 };
 
 // Print tag used for debugging
-console.log("Using tag: dffsad", process.env.npm_config_TAGS);
+console.log("Using tag:", process.env.npm_config_TAGS);
