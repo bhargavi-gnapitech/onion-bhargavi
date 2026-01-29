@@ -5,7 +5,7 @@
          let browser;
          let page;
          When('the user enters valid username',{ timeout: 60000 }, async function () {
-            browser = await chromium.launch({ headless: false });
+            browser = await chromium.launch({ headless: true });
             const context = await browser.newContext();
             page = await context.newPage();
             await page.goto('https://dev.onion.gnapitech.org/');
