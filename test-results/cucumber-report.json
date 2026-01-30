@@ -14,7 +14,7 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 1558599
+              "duration": 1446699
             }
           },
           {
@@ -22,7 +22,7 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 193794999
+              "duration": 228250199
             }
           },
           {
@@ -35,7 +35,7 @@
             },
             "result": {
               "status": "passed",
-              "duration": 1443699800
+              "duration": 1353604799
             }
           },
           {
@@ -48,7 +48,7 @@
             },
             "result": {
               "status": "passed",
-              "duration": 289608999
+              "duration": 285688998
             }
           },
           {
@@ -61,7 +61,7 @@
             },
             "result": {
               "status": "passed",
-              "duration": 176262999
+              "duration": 132611298
             }
           },
           {
@@ -74,7 +74,7 @@
             },
             "result": {
               "status": "passed",
-              "duration": 2827000
+              "duration": 2520499
             }
           },
           {
@@ -82,11 +82,11 @@
             "hidden": true,
             "result": {
               "status": "passed",
-              "duration": 709797000
+              "duration": 727703199
             },
             "embeddings": [
               {
-                "data": "VVVJRDogYjBkYTA2ZWQtMTlkZi00NTFjLTljNzYtMmJkNDM1MWNlYmEw",
+                "data": "VVVJRDogY2ZiMTFlMzUtNTJkOC00YzA2LWEwYzMtMTljZjRlMTYzZWE3",
                 "mime_type": "text/plain"
               },
               {
@@ -104,6 +104,164 @@
           {
             "name": "@Ologin",
             "line": 7
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "onion-application-login;create-a-new-project-successfully",
+        "keyword": "Scenario",
+        "line": 15,
+        "name": "Create a new project successfully",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 1531099
+            }
+          },
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 233981400
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 16,
+            "name": "the user clicks on the profile icon on the left side",
+            "match": {
+              "location": "src\\test\\Onion\\steps\\onionCreateProject.js:9"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 3168845199
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 17,
+            "name": "the user selects Settings option",
+            "match": {
+              "location": "src\\test\\Onion\\steps\\onionCreateProject.js:23"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 401359999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 18,
+            "name": "the user navigates to the Projects module",
+            "match": {
+              "location": "src\\test\\Onion\\steps\\onionCreateProject.js:30"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 153868599
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 19,
+            "name": "the user clicks on Add Project button",
+            "match": {
+              "location": "src\\test\\Onion\\steps\\onionCreateProject.js:36"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 319754799
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 20,
+            "name": "the user enters project name",
+            "match": {
+              "location": "src\\test\\Onion\\steps\\onionCreateProject.js:43"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 74363298
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 21,
+            "name": "the user enters project description",
+            "match": {
+              "location": "src\\test\\Onion\\steps\\onionCreateProject.js:49"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 558734200
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 22,
+            "name": "the user clicks on Save button",
+            "match": {
+              "location": "src\\test\\Onion\\steps\\onionCreateProject.js:57"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 5057568599
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 23,
+            "name": "the project should be created successfully",
+            "match": {
+              "location": "src\\test\\Onion\\steps\\onionCreateProject.js:65"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 13569600
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 562565000
+            },
+            "embeddings": [
+              {
+                "data": "VVVJRDogNGMyY2MyOTQtMTJkYi00ODMyLThhYTUtNmQyNGQwYmFiNzUz",
+                "mime_type": "text/plain"
+              },
+              {
+                "data": "iVBORw0KGgoAAAANSUhEUgAABQAAAALQCAIAAABAH0oBAAAQAElEQVR4nOzXQQEAMAgAIR/2r+x67KAFe3cDAAAAv9sBAACAAAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQYAgAIBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgAQBBgAAdsBD6AAAAEZJREFUIEGAAQAASBBgAAAAEgQYAACABAEGAAAgQYABAABIEGAAAAASBBgAAIAEAQYAACBBgAEAAEgQYAAAABIEGAAAgIQHAAD//93CXf0AAAAGSURBVAMAkKsOPoHtCG4AAAAASUVORK5CYII=",
+                "mime_type": "image/png"
+              }
+            ]
+          }
+        ],
+        "tags": [
+          {
+            "name": "@Regression",
+            "line": 1
+          },
+          {
+            "name": "@OCreateProject",
+            "line": 14
           }
         ],
         "type": "scenario"

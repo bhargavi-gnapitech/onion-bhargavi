@@ -41,14 +41,14 @@
  
 
          When('the user enters project name',{ timeout: 60000 }, async function () {
-           await page.getByPlaceholder('Enter Project Name').fill('Automation');
+           await page.getByPlaceholder('Enter Project Name').fill('Automation1');
 
          });
 
 
          When('the user enters project description',{ timeout: 60000 }, async function () {
            await page.locator('.tiptap.ProseMirror').click();
-           await page.keyboard.type('This project is created for automation testing purpose.');
+           await page.keyboard.type('This project is created for automation testing purpose1.');
 
          });
 
