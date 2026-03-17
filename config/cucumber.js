@@ -3,7 +3,7 @@ module.exports = {
 	default: {
 		// World parameters
 		'world-parameters': {
-			baseURL: 'https://dev.onion.gnapitech.org',
+			baseURL: 'http://localhost:8085/login',
 		},
 
 		// Read tags passed from npm, example:
@@ -12,11 +12,11 @@ module.exports = {
 		tags: process.env.npm_config_TAGS? process.env.npm_config_TAGS.split(',').join(' or ') : "",
 
 		// Feature file locations
-		paths: ['src/test/Onion/**/*.feature'],
+		paths: ['src/test/gigapower/**/*.feature'],
 
 		// Step definitions + hooks
 		require: [
-			'src/test/Onion/steps/**/*.js',
+			'src/test/gigapower/steps/**/*.js',
 			'src/support/hooks.js',
 		],
 

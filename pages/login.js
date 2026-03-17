@@ -9,11 +9,11 @@ class LoginPage {
 		this.ipUsername = page.locator('#login-user');
 		this.ipPassword = page.locator('#login-pass');
 		this.btnSubmit = page.locator('#login-submission');
-		this.btnLogout = page.locator('//a[contains(@class, "ant-typography") and text()="Logout"]');
+		this.btnLogout = page.locator('#logout-link');
 
 	}
 	async gotoLoginPage() {
-		await this.page.goto('https://uat.neon.iqgeo.cloud');
+		await this.page.goto('http://localhost:8085/login');
 	}
 
 	/**

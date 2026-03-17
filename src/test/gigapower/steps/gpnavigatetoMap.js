@@ -1,41 +1,67 @@
-const { Given, When, Then, And, After } = require('@cucumber/cucumber');
+const { Given, When, Then } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
+
 const { LoginPage } = require('../../../../pages/login');
-const { gigapower } = require('../../../../pages/apps/gigaPower');
-const { IQGEO_USERNAME, IQGEO_PASSWORD } = require('../../../../base_lib/constants.js');
-const { BASE_URL } = require('../../../../base_lib/constants');
+const { IndexPage } = require('../../../../pages/index');
+const { gigapower } = require('../../../../pages/apps/gigaPower'); // 
+const { USERNAME, PASSWORD, PRE_UAT_URL } =
+  require('../../../../base_lib/credentials');
 
-let login, GigaPower;
+let login;
+let index;
+let GigaPower; // 
 
-Given('User is logged into Giga Power', { timeout: 600000 }, async function () {
-	// await global.page.goto('https://dev2.neon.iqgeo.cloud/pre-uat/login');
-	login =  new LoginPage(global.page);
-	await login.login(IQGEO_USERNAME, IQGEO_PASSWORD);
-	await page.waitForLoadState('networkidle', { timeout: 60000 });
 
-	GigaPower = new gigapower(global.page);
-	await GigaPower.handleNotificationDialog(global.page);
+// ================= GIVEN =================
+Given('User is logged into Giga Power', { timeout: 300000 }, async function () {
+
+  await global.page.goto(PRE_UAT_URL);
+
+  login = new LoginPage(global.page);
+  await login.login(USERNAME, PASSWORD);
+
+  await global.page.waitForLoadState('networkidle', { timeout: 120000 });
+
 });
 
+
+// ================= WHEN =================
 When(
-	'User clicks on map icon at the bottom of the UI',
-	{ timeout: 120000 },
-	async function () {
-		
-	await global.page.waitForSelector(`//div[span[@role='img' and @aria-label='environment' and contains(@class, 'anticon-environment')]]`);
+'User clicks on map icon at the bottom of the UI',
+{ timeout: 600000 },
+async function () {
 
-	await global.page.locator(`//div[span[@role='img' and @aria-label='environment' and contains(@class, 'anticon-environment')]]`).click();
-	}
-);
+ 
+  index = new IndexPage(global.page);
+  await index.openApplication('testapp.html');
 
-Then(
-	'Network manager application should be launched',
-	{ timeout: 120000 },
-	async function () {
-		const screenshot = await global.page.screenshot({ path: `src/test/screenshots/closePage_${Date.now()}.png` });
-		const detailsPanel = page.locator(`.tabControl_nav.noselect`); // Adjust selector as needed
-		await global.page.waitForLoadState('networkidle', { timeout: 60000 });
-		await expect(detailsPanel).toBeVisible(); // Ensure the detailsPanel is visible
+  
+  await global.page.waitForLoadState('networkidle', {
+    timeout: 300000
+  });
 
-	}
-);
+  await global.page.waitForTimeout(8000);
+
+ 
+  GigaPower = new gigapower(global.page);
+
+  
+  await GigaPower.btnAddObject.waitFor({ state: 'visible' });
+  await GigaPower.btnAddObject.click();
+
+  console.log(" Add Object clicked");
+});
+
+
+// ================= THEN =================
+Then('Network manager application should be launched', { timeout: 300000 }, async function () 
+{
+
+  const mapCanvas = global.page.locator('canvas, .map, #map');
+
+  await expect(mapCanvas.first()).toBeVisible({
+    timeout: 180000
+  });
+
+  console.log("Map launched successfully");
+});

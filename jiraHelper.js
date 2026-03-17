@@ -170,3 +170,18 @@
 // })();
 
 // module.exports = { createJiraIssue, fetchAllJiraIssues };
+
+// -----------------------------------------------------------------------
+// CHANGED (2026-03-17): Added stub exports below
+// WHY: Everything above is commented out (Jira integration disabled).
+//      hooks.js line 8 does: const { createJiraIssue } = require('../../jiraHelper');
+//      and calls createJiraIssue() in the After hook when a test fails.
+//      Without an export, this threw "TypeError: createJiraIssue is not a function"
+//      and crashed the After hook for every failed test.
+//      Stubs return null/[] so hooks.js doesn't crash, and can be replaced
+//      with real implementations when Jira is re-enabled.
+// Old code: // module.exports = { createJiraIssue, fetchAllJiraIssues };  ← was commented out
+// -----------------------------------------------------------------------
+async function createJiraIssue() { return null; }
+async function fetchAllJiraIssues() { return []; }
+module.exports = { createJiraIssue, fetchAllJiraIssues };

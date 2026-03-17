@@ -34,7 +34,7 @@ Before({ timeout: 20000 }, async function () {
 		fs.mkdirSync(videoDir, { recursive: true });
 		console.log(`Video directory created: ${videoDir}`);
 	}
-	global.browser = await chromium.launch({ headless: true });
+	global.browser = await chromium.launch({ headless: false });
 	// global.page = await browser.newPage();
 	global.context = await browser.newContext({
 		recordVideo: { dir: videoDir, size: { width: 1280, height: 720 } }, // Set video recording

@@ -89,11 +89,14 @@ Feature:TestCases in Gigapower Application
 
 
     @gpcreatedesign
-    Scenario:User should be able to create the design using maps in Gigapower Application in IQGEO
-        Given User is in Network manager application
-        When User single clicks at 3 points on the map and double clicks at the last point
-        And User inputs the fields and clicks on Create
-        Then New design is created
+    @gpcreatedesign
+  Scenario: User should be able to create a design in Gigapower Application
+    Given User is logged in and opens the Network Manager
+    When User clicks the pencil icon and selects Design
+    And User draws 4 points on the map
+    And User enters a name and saves the design
+    Then New design is created successfully
+
 
 
     # ------------------------------------------------------------------------------------------
@@ -283,6 +286,14 @@ When User searches that record in the search ticket field
 And User should clicks on the Milestone tab to switch to the milestone section
 When User should clicks on the milestone row which is ERP Status as 'FAILED'
 Then User should be able to see the 'VIEW LOGS' Button in the UPDATE section
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ @gpLoginWithValid
+  Scenario: User should be able to login with valid username and valid password
+     Given User Opens the "IQGeo URL"
+     When User inputs valid "username" and "password"
+     And Click on Login
+     Then User should be navigated to Landing page
 
 
 

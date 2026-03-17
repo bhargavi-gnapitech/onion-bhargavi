@@ -1,103 +1,109 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
-const { chromium } = require('@playwright/test');
-const { CommsApp } = require('../../../../pages/apps/mywcom.js');
 const { expect } = require('@playwright/test');
-const { LoginPage } = require('../../../../pages/login.js');
-const { StandardApp } = require('../../../../pages/apps/standard.js');
-const { gigapower } = require('../../../../pages/apps/gigaPower.js');
-const { Regression } = require('../../../../pages/apps/regression.js');
 
-const { IQGEO_USERNAME, IQGEO_PASSWORD } = require('../../../../base_lib/constants.js');
-const { BASE_URL } = require('../../../../base_lib/constants.js');
-const { IndexPage } = require('../../../../pages/index.js');
-const { arg } = require('../../../../base_lib/Input.js');
+const { LoginPage } = require('../../../../pages/login');
+const { IndexPage } = require('../../../../pages/index');
+const { gigapower } = require('../../../../pages/apps/gigaPower');
+const { arg } = require('../../../../base_lib/Input');
+const { USERNAME, PASSWORD, PRE_UAT_URL } = require('../../../../base_lib/credentials');
 
 let login;
+let index;
 let GigaPower;
-let regression;
-let Standard
-Given(
-	'User is in Network manager application',
-	{ timeout: 60000000 },
-	async function () {
 
-		
-		await global.page.goto("https://dev2.neon.iqgeo.cloud/pre_uat_72");
-		login = new LoginPage(global.page);
-		await login.login("admin", "iqgeo");
 
-		index = new IndexPage(global.page);
-          
-		await index.openApplication(('att_network_manager.html'),{timeout:400000});
-		regression = new Regression(global.page); 
-		await regression.handleDialogClose();
-		
-		GigaPower = new gigapower(global.page);
-		
-		Standard = new StandardApp(global.page);
+// ================= @gpcreatedesign =================
 
-		await GigaPower.btnAddObject.click();
+// Step 1: Login and open test app
+Given('User is logged in and opens the Network Manager', { timeout: 300000 }, async function () {
 
-		await global.page.locator(`#${arg.objectId}`).click();
+  await global.page.goto(PRE_UAT_URL);
 
-		//await GigaPower.drawPolygon(arg.design_coordinates);
+  login = new LoginPage(global.page);
+  await login.login(USERNAME, PASSWORD);
+  await global.page.waitForLoadState('networkidle', { timeout: 120000 });
+  console.log('✅ Logged in');
 
-		await GigaPower.fillForm(arg.designDetails);
-		
-		 // Click the calendar icon
-        await global.page.locator('.ui-datepicker-trigger').click();
+  // Click test_app tile from index page
+  index = new IndexPage(global.page);
+  await index.openApplication('testapp.html', { timeout: 400000 });
 
-        // Select today's date (highlighted with class like 'ui-state-highlight')
-        await global.page.locator('.ui-datepicker-today a').click();
-		// Click the 3rd dropdown with class 'ui-select'
-await global.page.locator("(//div[contains(@class, 'ui-select')])[3]").click();
-
-// Select "HLD" from the dropdown
-await global.page.locator("//div[contains(@class, 'ant-select-item-option-content') and text()='HLD']").click();
+  await global.page.waitForLoadState('networkidle', { timeout: 300000 });
   await global.page.waitForTimeout(5000);
-		await global.page.waitForLoadState('networkidle', { timeout: 120000 });
-	}
-);
 
-When(
-	'User single clicks at 3 points on the map and double clicks at the last point',
-	{ timeout: 8000000 },
-	async function () {
-		await GigaPower.drawPolygon(arg.design_coordinates);
-		await page.waitForLoadState('networkidle', { timeout: 120000 });
-		await global.page.locator('//button[text()="Save"]').click();
-		console.log('----------------in insert pole block 2 created design');
+  GigaPower = new gigapower(global.page);
+  console.log('✅ test_app opened, map loaded');
 
-		await global.page.waitForSelector(
-			'//div[contains(@class, "feature-title")]',
-			{ timeout: 15000 }
-		);
-		await global.page.waitForLoadState('networkidle', { timeout: 120000 });
-		await GigaPower.openDesign();
-		await global.page.waitForLoadState('networkidle', { timeout: 120000 });
-		
+});
 
-	}
-);
 
-When(
-	'User inputs the fields and clicks on Create',
-	{ timeout: 60000 },
-	async function () {
-		console.log("design created with specific co-ordinates");
+// Step 2: Click pencil icon and select Design
+When('User clicks the pencil icon and selects Design', { timeout: 300000 }, async function () {
 
-	}
-);
+  // Click pencil (Add Object) button
+  await global.page.locator('#a-createFeature').waitFor({ state: 'attached' });
+  await global.page.locator('#a-createFeature').click({ force: true });
+  console.log('✅ Pencil / Add Object clicked');
 
-Then(
-	'New design is created', 
-	{ timeout: 60000 },
-	 async function () {
-		
-	console.log(' new design got created ');
+  await global.page.waitForTimeout(2000);
 
-	
+  // Select "Design" from the list
+  await global.page.locator("//li[normalize-space(text())='Design']").click();
+  console.log('✅ Design selected from list');
 
-	
+  await global.page.waitForTimeout(1000);
+
+});
+
+
+// Step 3: Draw 4 points on the map
+When('User draws 4 points on the map', { timeout: 8000000 }, async function () {
+
+  await GigaPower.drawPolygon(arg.design_coordinates);
+  console.log('✅ 4 points drawn on map');
+
+  await global.page.waitForLoadState('networkidle', { timeout: 120000 });
+
+});
+
+
+// Step 4: Enter name and save
+When('User enters a name and saves the design', { timeout: 300000 }, async function () {
+
+  // Wait for New Design form
+  await global.page.waitForSelector('text=New Design:', { timeout: 15000 });
+  console.log('✅ New Design form visible');
+
+  // Fill Name field via JS to trigger proper input events
+  const designName = 'Design_' + Date.now();
+  await global.page.evaluate((name) => {
+    const input = document.querySelector('input.text.ui-input');
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    nativeInputValueSetter.call(input, name);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }, designName);
+  console.log('✅ Name entered:', designName);
+
+  await global.page.waitForTimeout(1000);
+
+  // Click Save button
+  await global.page.locator('button.ant-btn-primary.ant-btn-compact-first-item').click();
+  console.log('✅ Save clicked');
+
+  await global.page.waitForLoadState('networkidle', { timeout: 120000 });
+
+});
+
+
+// Step 5: Verify design created
+Then('New design is created successfully', { timeout: 60000 }, async function () {
+
+  await global.page.waitForSelector(
+    '//div[contains(@class, "feature-title")]',
+    { timeout: 15000 }
+  );
+
+  console.log('✅ New design created successfully');
 
 });

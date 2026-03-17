@@ -25,7 +25,7 @@ const { USERNAME,PASSWORD ,PRE_UAT_URL} = require('../../../../base_lib/credenti
   When('Click on Login',{ timeout: 600000 }, async function () {
    
     index = new IndexPage(global.page);
-    await index.openApplication(('mywcm_contractor.html'),{timeout:4000});
+    await index.openApplication(('index.html'),{timeout:4000});
 
    
 
@@ -35,7 +35,7 @@ const { USERNAME,PASSWORD ,PRE_UAT_URL} = require('../../../../base_lib/credenti
 
   Then('User should be navigated to Landing page',{ timeout: 6000 }, async function () {
 
-    const expectedUrl = 'https://dev2.neon.iqgeo.cloud/pre_uat_72/mywcm_contractor.html';
+    const expectedUrl = 'http://localhost:8085/index';
     const currentUrl = await global.page.url();
 
     // Assert that the current URL matches the expected URL
