@@ -443,7 +443,7 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		console.log('🚀👊 ~ file: mywcom.js:34 ~ designName:', designName);
 		expect(designName).toBe('Design: ' + args.designName);
 	}
-
+l
 	async fillForm(arg) {
 		if (typeof arg !== 'object' || arg === null) {
 			throw new Error('Invalid argument provided to fillForm.');
@@ -606,116 +606,112 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 // }
 
 
-	// -----------------------------------------------------------------------
-	// CHANGED (2026-03-17): Entire drawPolygon method rewritten
-	// WHY - Two bugs in the original:
-	//
-	// BUG 1 — Per-point view fitting caused NaN pixel coordinates:
-	//   The original second evaluate() called map.getView().fit() for EACH
-	//   coordinate separately, then immediately called getPixelFromCoordinate().
-	//   Because fit() is async (the map re-renders), the view hadn't settled
-	//   yet when getPixelFromCoordinate() was called, producing NaN for early
-	//   points and garbage values for later ones.
-	//   FIX: Fit the view ONCE to the bounding box of all coordinates, wait
-	//   for the map to render, then get all pixel positions in a single evaluate.
-	//
-	// BUG 2 — Stale canvas element handle caused dblclick to fail:
-	//   The original captured canvasLocator.elementHandle() before the 100-second
-	//   wait (await this.page.waitForTimeout(100000)). After 100s the map
-	//   re-renders and the original canvas DOM element is replaced, so the handle
-	//   is stale and throws "Element is not attached to the DOM".
-	//   FIX: Use page.mouse.click/dblclick with absolute screen coordinates
-	//   (canvas bounding box + pixel offset) instead of elementHandle.click.
-	//   page.mouse never goes stale.
-	//
-	// OLD CODE (original implementation):
-	// async drawPolygon(coordinates) {
-	//     const canvasLocator = await this.page.locator('canvas').nth(0);
-	//     await this.page.waitForSelector('canvas', { state: 'visible' });
-	//     // First evaluate: fit view using myw.proj.toProjExtent with EPSG:3857
-	//     await this.page.evaluate((coordinates) => {
-	//         const extent = myw.proj.toProjExtent([[...],[...],[...],[...]], 'EPSG:3857');
-	//         myw.app.map.getView().fit(extent, { maxZoom: 9 });
-	//     }, coordinates);
-	//     await this.page.waitForTimeout(100000);  // ← 100 second wait!
-	//     const canvasElement = await canvasLocator.elementHandle();  // ← stale after wait
-	//     // Second evaluate: called fit() PER POINT, then getPixelFromCoordinate
-	//     const pxldata = await this.page.evaluate((coordinates) => {
-	//         coordinates.forEach((coo) => {
-	//             const projExtent = myw.proj.toProjExtent([[lon, lat]], 'EPSG:3857');
-	//             myw.app.map.getView().fit(projExtent, myw.app.map.getSize()); // ← changes view per point!
-	//             const pixelCoords = myw.app.map.getPixelFromCoordinate([projExtent[0], projExtent[1]]); // ← NaN
-	//         });
-	//     }, coordinates);
-	//     // Used canvasElement.dblclick({ position: {x,y} }) ← stale element crash
-	// }
-	// -----------------------------------------------------------------------
 	async drawPolygon(coordinates) {
-        console.log('drawPolygon coordinates:', coordinates);
+    console.log('🚀👊 ~ file: standard.js:290 ~ coordines:', coordinates);
 
-        if (!coordinates || coordinates.length < 4) {
-            throw new Error('Invalid coordinates provided for the polygon.');
-        }
+    // Ensure coordinates are valid
+    if (!coordinates || coordinates.length < 4) {
+        throw new Error('Invalid coordinates provided for the polygon.');
+    }
 
-        await this.page.waitForSelector('canvas', { state: 'visible' });
+    const canvasLocator = await this.page.locator('canvas').nth(0);
+    await this.page.waitForSelector('canvas', { state: 'visible' });
 
-        // Step 1: Fit the view to all coordinates at once (do NOT change view per-point)
-        await this.page.evaluate((coordinates) => {
-            const parsed = coordinates.map((coo) => {
-                const parts = coo.trim().split(',');
-                return [parseFloat(parts[0]), parseFloat(parts[1])];
-            });
-            const lons = parsed.map((p) => p[0]);
-            const lats = parsed.map((p) => p[1]);
-            myw.app.map.getView().fit(
-                [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)],
-                { maxZoom: 17 }
-            );
-        }, coordinates);
+    if (!canvasLocator) {
+        throw new Error('Canvas element not found.');
+    }
 
-        // Step 2: Wait for the map to finish rendering
-        // CHANGED: was waitForTimeout(100000) — 100 seconds. Reduced to 3 seconds.
-        // Old code: await this.page.waitForTimeout(100000);
-        await this.page.waitForTimeout(3000);
-
-        // Step 3: Get all pixel coordinates at once — view is stable, no per-point changes
-        const pxldata = await this.page.evaluate((coordinates) => {
-            return coordinates.map((coo) => {
-                const parts = coo.trim().split(',');
-                return myw.app.map.getPixelFromCoordinate([
-                    parseFloat(parts[0]),
-                    parseFloat(parts[1]),
-                ]);
-            });
-        }, coordinates);
-
-        console.log('Pixel data:', pxldata);
-
-        // Step 4: Get canvas bounding box for absolute screen coordinates
-        const box = await this.page.locator('canvas').nth(0).boundingBox();
-        if (!box) throw new Error('Canvas bounding box not found.');
-
-        // Step 5: Click using page.mouse — avoids stale element handle issues entirely
-        // CHANGED: was canvasElement.click({ position: {x, y} }) and canvasElement.dblclick(...)
-        // Old code: await canvasElement.click({ position: { x, y }, force: true });
-        //           await canvasElement.dblclick({ position: { x, y }, force: true });
-        for (let i = 0; i < pxldata.length; i++) {
-            const coord = pxldata[i];
-            if (!coord || isNaN(coord[0]) || isNaN(coord[1])) {
-                throw new Error(`Invalid pixel coordinate at index ${i}: ${JSON.stringify(coord)}`);
+    // Convert the coordinates into numbers and fit the view
+    await this.page.evaluate((coordinates) => {
+        const parsedCoordinates = coordinates.map((coo) => {
+            const parts = coo.split(',');
+            if (parts.length !== 2) {
+                throw new Error('Invalid coordinate format.');
             }
-            const absX = box.x + coord[0];
-            const absY = box.y + coord[1];
+            return [parseFloat(parts[0]), parseFloat(parts[1])];
+        });
 
-            if (i === pxldata.length - 1) {
-                await this.page.mouse.dblclick(absX, absY);
-                console.log(`Double-click at (${absX}, ${absY})`);
-            } else {
-                await this.page.mouse.click(absX, absY);
-                console.log(`Click at (${absX}, ${absY})`);
+        const extent = myw.proj.toProjExtent(
+            [
+                [
+                    parsedCoordinates[0][0],
+                    parsedCoordinates[2][1],
+                    parsedCoordinates[1][0],
+                    parsedCoordinates[1][1],
+                ],
+            ],
+            'EPSG:3857'
+        );
+
+        console.log('Projected extent:', extent);
+
+        myw.app.map.getView().fit(extent, { maxZoom: 9 });
+    }, coordinates);
+
+    // Wait for the map to adjust the view
+    await this.page.waitForTimeout(100000);
+
+    // ✅ Re-grab canvas AFTER the wait - avoids stale element reference
+    const canvasElement = await canvasLocator.elementHandle();
+    if (!canvasElement) {
+        throw new Error('Canvas element not found after map load.');
+    }
+
+    const pxldata = await this.page.evaluate((coordinates) => {
+        const pxls_d = [];
+
+        coordinates.forEach((coo) => {
+            const parts = coo.split(',');
+            const lon = parseFloat(parts[0]);
+            const lat = parseFloat(parts[1]);
+
+            const projExtent = myw.proj.toProjExtent([[lon, lat]], 'EPSG:3857');
+
+            myw.app.map.getView().fit(
+                myw.proj.toProjExtent([[lon, lat]], 'EPSG:3857'),
+                myw.app.map.getSize()
+            );
+
+            const pixelCoords = myw.app.map.getPixelFromCoordinate([
+                projExtent[0],
+                projExtent[1],
+            ]);
+
+            pxls_d.push(pixelCoords);
+        });
+
+        return pxls_d;
+    }, coordinates);
+
+    console.log('🚀👊 ~ Pixel data:', pxldata, pxldata.length);
+
+    // Click on the corresponding points on the canvas
+    for (let i = 0; i < pxldata.length; i++) {
+        const coord = pxldata[i];
+        const x = coord[0];
+        const y = coord[1];
+
+        if (i === 3) {
+            // Double-click on the last point to complete the polygon
+            await canvasElement.dblclick({
+                position: { x, y },
+                force: true,
+            });
+            console.log('🚀👊 ~ Double Click:', x, y, '|', i);
+        } else {
+            // Single-click on other points
+            try {
+                await canvasElement.click({
+                    position: { x, y },
+                    force: true,
+                });
+                console.log('🚀👊 ~ Single Click:', x, y, '|', i);
                 await this.page.waitForTimeout(500);
+            } catch (error) {
+                console.log('Error during click:', error);
             }
         }
     }
+}
 }
 module.exports = { gigapower };

@@ -297,7 +297,10 @@ Then User should be able to see the 'VIEW LOGS' Button in the UPDATE section
 
 
 
-
+@gpDebugMethods
+Scenario: Debug gigapower page object methods
+  Given User logged in the Network manager application
+  When I debug gigapower methods
 
 
 
