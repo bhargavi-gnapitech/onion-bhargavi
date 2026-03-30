@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(find \"C:\\\\IQGEO automation\\\\onion-bhargavi/pages/apps\" -type f -name \"*.js\" -exec wc -l {} +)",
+      "Bash(find \"C:\\\\IQGEO automation\\\\onion-bhargavi/src/test\" -name \"*.feature\" -exec wc -l {} +)",
+      "Bash(npm run:*)",
+      "Bash(node -e \":*)"
     ]
   }
 }

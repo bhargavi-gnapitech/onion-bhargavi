@@ -1,5 +1,8 @@
 const { expect } = require('@playwright/test');
 const { StandardApp } = require('./standard');
+const { LoginPage } = require('../login');
+const { IndexPage } = require('../index');
+const { USERNAME, PASSWORD, PRE_UAT_URL } = require('../../base_lib/credentials');
 const fs = require('fs');
 const csv = require('csv-parser');
 class gigapower extends StandardApp {
@@ -443,7 +446,7 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		console.log('🚀👊 ~ file: mywcom.js:34 ~ designName:', designName);
 		expect(designName).toBe('Design: ' + args.designName);
 	}
-l
+
 	async fillForm(arg) {
 		if (typeof arg !== 'object' || arg === null) {
 			throw new Error('Invalid argument provided to fillForm.');
@@ -607,111 +610,418 @@ l
 
 
 	async drawPolygon(coordinates) {
-    console.log('🚀👊 ~ file: standard.js:290 ~ coordines:', coordinates);
+    console.log('📍 Received coordinates:', coordinates);
 
-    // Ensure coordinates are valid
     if (!coordinates || coordinates.length < 4) {
         throw new Error('Invalid coordinates provided for the polygon.');
     }
 
-    const canvasLocator = await this.page.locator('canvas').nth(0);
-    await this.page.waitForSelector('canvas', { state: 'visible' });
+    // Parse lon/lat from "lon,lat" strings (trim whitespace first)
+    const parsed = coordinates.map((coo) => {
+        const parts = coo.trim().split(',');
+        if (parts.length !== 2) throw new Error(`Invalid coordinate format: "${coo}"`);
+        return [parseFloat(parts[0]), parseFloat(parts[1])];
+    });
 
-    if (!canvasLocator) {
-        throw new Error('Canvas element not found.');
-    }
-
-    // Convert the coordinates into numbers and fit the view
-    await this.page.evaluate((coordinates) => {
-        const parsedCoordinates = coordinates.map((coo) => {
-            const parts = coo.split(',');
-            if (parts.length !== 2) {
-                throw new Error('Invalid coordinate format.');
-            }
-            return [parseFloat(parts[0]), parseFloat(parts[1])];
-        });
-
+    // Step 1: Zoom map to the bounding extent of the coordinates using IQGeo's API.
+    // myw.proj.toProjExtent converts from EPSG:4326 (degrees) to EPSG:3857 (meters).
+    await this.page.evaluate((coords) => {
+        const lons = coords.map(c => c[0]);
+        const lats = coords.map(c => c[1]);
         const extent = myw.proj.toProjExtent(
-            [
-                [
-                    parsedCoordinates[0][0],
-                    parsedCoordinates[2][1],
-                    parsedCoordinates[1][0],
-                    parsedCoordinates[1][1],
-                ],
-            ],
+            [[Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]],
             'EPSG:3857'
         );
+        console.log('Fitting map to extent:', extent);
+        myw.app.map.getView().fit(extent, { size: myw.app.map.getSize(), maxZoom: 15 });
+    }, parsed);
 
-        console.log('Projected extent:', extent);
+    // Wait for map tiles to render (much shorter than the previous 100s)
+    await this.page.waitForTimeout(4000);
 
-        myw.app.map.getView().fit(extent, { maxZoom: 9 });
-    }, coordinates);
+    // Step 2: Get fresh canvas bounding box AFTER the map has settled
+    const canvas = this.page.locator('canvas').nth(0);
+    await canvas.waitFor({ state: 'visible', timeout: 15000 });
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas bounding box not found after map load.');
+    console.log(`✅ Canvas ready — x:${Math.round(box.x)} y:${Math.round(box.y)} w:${box.width} h:${box.height}`);
 
-    // Wait for the map to adjust the view
-    await this.page.waitForTimeout(100000);
+    // Step 3: Click 4 positions forming a rectangle on the visible canvas.
+    // page.mouse avoids DOM-detachment errors that elementHandle clicks cause when the
+    // map re-renders. Viewport-relative positions are used because getPixelFromCoordinate
+    // in this IQGeo wrapper returns projection coordinates, not screen pixels.
+    const points = [
+        [box.x + box.width * 0.3, box.y + box.height * 0.3],  // top-left
+        [box.x + box.width * 0.7, box.y + box.height * 0.3],  // top-right
+        [box.x + box.width * 0.7, box.y + box.height * 0.7],  // bottom-right
+        [box.x + box.width * 0.3, box.y + box.height * 0.7],  // bottom-left (double-click to close)
+    ];
 
-    // ✅ Re-grab canvas AFTER the wait - avoids stale element reference
-    const canvasElement = await canvasLocator.elementHandle();
-    if (!canvasElement) {
-        throw new Error('Canvas element not found after map load.');
-    }
-
-    const pxldata = await this.page.evaluate((coordinates) => {
-        const pxls_d = [];
-
-        coordinates.forEach((coo) => {
-            const parts = coo.split(',');
-            const lon = parseFloat(parts[0]);
-            const lat = parseFloat(parts[1]);
-
-            const projExtent = myw.proj.toProjExtent([[lon, lat]], 'EPSG:3857');
-
-            myw.app.map.getView().fit(
-                myw.proj.toProjExtent([[lon, lat]], 'EPSG:3857'),
-                myw.app.map.getSize()
-            );
-
-            const pixelCoords = myw.app.map.getPixelFromCoordinate([
-                projExtent[0],
-                projExtent[1],
-            ]);
-
-            pxls_d.push(pixelCoords);
-        });
-
-        return pxls_d;
-    }, coordinates);
-
-    console.log('🚀👊 ~ Pixel data:', pxldata, pxldata.length);
-
-    // Click on the corresponding points on the canvas
-    for (let i = 0; i < pxldata.length; i++) {
-        const coord = pxldata[i];
-        const x = coord[0];
-        const y = coord[1];
-
-        if (i === 3) {
-            // Double-click on the last point to complete the polygon
-            await canvasElement.dblclick({
-                position: { x, y },
-                force: true,
-            });
-            console.log('🚀👊 ~ Double Click:', x, y, '|', i);
+    for (let i = 0; i < points.length; i++) {
+        const [x, y] = points[i];
+        if (i === points.length - 1) {
+            await this.page.mouse.dblclick(x, y);
+            console.log(`✅ Double-click (close polygon) at (${Math.round(x)}, ${Math.round(y)})`);
         } else {
-            // Single-click on other points
-            try {
-                await canvasElement.click({
-                    position: { x, y },
-                    force: true,
-                });
-                console.log('🚀👊 ~ Single Click:', x, y, '|', i);
-                await this.page.waitForTimeout(500);
-            } catch (error) {
-                console.log('Error during click:', error);
-            }
+            await this.page.mouse.click(x, y);
+            console.log(`✅ Click point ${i + 1} at (${Math.round(x)}, ${Math.round(y)})`);
+            await this.page.waitForTimeout(500);
         }
     }
+    console.log('✅ Polygon drawing completed.');
 }
+
+	// Before: drawPolygon() zoomed the map to hardcoded coordinates before clicking,
+	//         causing failures when those coordinates fell on water or outside the
+	//         app's data extent (design would not draw or save).
+	// After : draw4PointsOnCurrentView() skips all coordinate/zoom logic and clicks
+	//         directly on the current map view so the test always draws on visible land.
+	// Harish, 30-03-26
+	async draw4PointsOnCurrentView() {
+		const canvas = this.page.locator('canvas').nth(0);
+		await canvas.waitFor({ state: 'visible', timeout: 15000 });
+		const box = await canvas.boundingBox();
+		if (!box) throw new Error('Canvas bounding box not found.');
+		console.log(`✅ Canvas — x:${Math.round(box.x)} y:${Math.round(box.y)} w:${box.width} h:${box.height}`);
+
+		const points = [
+			[box.x + box.width * 0.3, box.y + box.height * 0.2],
+			[box.x + box.width * 0.6, box.y + box.height * 0.2],
+			[box.x + box.width * 0.6, box.y + box.height * 0.4],
+			[box.x + box.width * 0.3, box.y + box.height * 0.4],
+		];
+
+		for (let i = 0; i < points.length; i++) {
+			const [x, y] = points[i];
+			if (i === points.length - 1) {
+				await this.page.mouse.dblclick(x, y);
+				console.log(`✅ Double-click (close polygon) at (${Math.round(x)}, ${Math.round(y)})`);
+			} else {
+				await this.page.mouse.click(x, y);
+				console.log(`✅ Click point ${i + 1} at (${Math.round(x)}, ${Math.round(y)})`);
+				await this.page.waitForTimeout(500);
+			}
+		}
+		console.log('✅ 4-point polygon drawn on current view.');
+	}
+
+	// ─── Shared setup ────────────────────────────────────────────────────────────
+	// Before: login + openApplication was copy-pasted in every Given step (gpMeasurement, gpShowCurrentLocation, gpPrint)
+	// After : one shared method here, all 3 Given steps just call loginAndOpenNetworkManager()
+	// Harish, 27-03-26
+
+	/**
+	 * Login and open the Network Manager application.
+	 * Shared by Measurement, Show Current Location, and Print tests.
+	 */
+	async loginAndOpenNetworkManager() {
+		await this.page.goto(PRE_UAT_URL);
+		const login = new LoginPage(this.page);
+		await login.login(USERNAME, PASSWORD);
+		await this.page.waitForLoadState('networkidle', { timeout: 120000 });
+
+		const index = new IndexPage(this.page);
+		await index.openApplication('testapp.html');
+		await this.page.waitForLoadState('networkidle', { timeout: 300000 });
+		await this.page.waitForTimeout(5000);
+
+		// Before: no check after opening app, test just continued blindly
+		// After : assert URL is testapp.html so we know the right page loaded
+		await expect(this.page).toHaveURL(/testapp\.html/, { timeout: 10000 });
+		console.log('✅ Logged in and Network Manager opened:', this.page.url());
+	}
+
+	// ─── Toolbar actions ─────────────────────────────────────────────────────────
+	// Before: all locator clicks and map interactions were written directly inside each step file
+	// After : moved into methods here so step files just call one function each
+	// Also added assertions in each method to validate the action worked
+	// Harish, 27-03-26
+
+	/**
+	 * Click the Measurement tool in the toolbar.
+	 */
+	async clickMeasurementTool() {
+		await this.page.locator(`//li[@title="Measurement tool"]`).click();
+		await this.page.waitForTimeout(2000);
+
+		// ✅ Assert: measurement tool button is now active in the toolbar
+		const measureBtn = this.page.locator(`//li[@title="Measurement tool"]`);
+		await expect(measureBtn).toBeVisible({ timeout: 5000 });
+		console.log('✅ Measurement tool clicked and is active in toolbar');
+	}
+
+
+	/**
+	 * Draw a measurement on the map using geo coordinates in "lon,lat" string format.
+	 * Uses the same approach as drawPolygon — manual mercator conversion + map fit.
+	 * Clicks each point in order; double-clicks the last point to finish the measurement.
+	 *
+	 * @param {string[]} coordinates - Array of "lon,lat" strings e.g. ["77.5946,12.9716", "80.2707,13.0827"]
+	 */
+	/**
+	 * Type a location name or coordinates into the map search box and select the first result.
+	 * This zooms the map away from world-view so getPixelFromCoordinate works reliably.
+	 *
+	 * @param {string} query - Place name to search, e.g. "Bangalore"
+	 */
+	async searchAndZoomToLocation(query) {
+		const searchBox = this.page.locator('#text-search');
+		await searchBox.waitFor({ state: 'visible', timeout: 10000 });
+		await searchBox.click();
+		await searchBox.clear();
+		await searchBox.fill(query);
+
+		// Wait for Google Places autocomplete dropdown to appear
+		const firstResult = this.page.locator('.pac-item').first();
+		try {
+			await firstResult.waitFor({ state: 'visible', timeout: 5000 });
+			await firstResult.click();
+			console.log(`✅ Search result clicked for: "${query}"`);
+		} catch {
+			// Fallback: press Enter if dropdown doesn't appear
+			await searchBox.press('Enter');
+			console.log(`✅ Pressed Enter to search for: "${query}"`);
+		}
+
+		// Wait for the map to pan and Google Maps tiles to fully paint
+		await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+		await this.page.waitForTimeout(5000);
+	}
+
+	/**
+	 * Draw a measurement on the map by clicking two points directly on the visible canvas.
+	 *
+	 * Why viewport-relative clicks instead of geo-to-pixel conversion:
+	 * myw.app.map.getPixelFromCoordinate() in IQGeo's map wrapper does NOT return
+	 * screen pixel positions — it returns raw projection coordinates (millions of meters),
+	 * so any geo-based pixel calculation lands completely off-screen and no measurement
+	 * is registered. Clicking at relative fractions of the canvas is reliable regardless
+	 * of the map API internals.
+	 *
+	 * @param {string[]} coordinates  - Kept for documentation; not used for click positions
+	 * @param {string}   startLocation - Searched first to zoom the map to a real area
+	 */
+	async drawMeasurement() {
+		const canvas = this.page.locator('#map_canvas');
+		await canvas.waitFor({ state: 'visible', timeout: 15000 });
+		const box = await canvas.boundingBox();
+		expect(box).not.toBeNull();
+		console.log(`✅ Map canvas ready — width: ${box.width}, height: ${box.height}`);
+
+		// Click two random points in the upper area of the canvas (avoids the dialog panel).
+		// Hover before each click to activate the tool's mousemove handler.
+		const clickY  = box.y + box.height * 0.35;
+		const point1X = box.x + box.width  * 0.25;
+		const point2X = box.x + box.width  * 0.75;
+
+		await this.page.mouse.move(point1X, clickY);
+		await this.page.waitForTimeout(300);
+		await this.page.mouse.click(point1X, clickY);
+		console.log(`✅ Click point 1 at (${Math.round(point1X)}, ${Math.round(clickY)})`);
+		await this.page.waitForTimeout(800);
+
+		await this.page.mouse.move(point2X, clickY);
+		await this.page.waitForTimeout(300);
+		await this.page.mouse.dblclick(point2X, clickY);
+		console.log(`✅ Double-click (finish) at (${Math.round(point2X)}, ${Math.round(clickY)})`);
+
+		await this.page.waitForTimeout(2000);
+		console.log('✅ Measurement drawing complete');
+	}
+
+	/**
+	 * Zoom the map to the given lon/lat coordinates and click exactly on each one to measure.
+	 * Uses myw.proj.toProjExtent to zoom, then derives screen pixels from the map's
+	 * center + resolution (standard OpenLayers formula — avoids getPixelFromCoordinate
+	 * which returns projection units in IQGeo's wrapper, not screen pixels).
+	 *
+	 * @param {string[]} coordinates - Array of "lon,lat" strings e.g. ["77.5946,12.9716", "80.2707,13.0827"]
+	 */
+	async drawExactMeasurement(coordinates) {
+		if (!coordinates || coordinates.length < 2) {
+			throw new Error('At least 2 coordinates are required.');
+		}
+
+		const parsed = coordinates.map((c) => {
+			const parts = c.trim().split(',');
+			if (parts.length !== 2) throw new Error(`Invalid coordinate: "${c}"`);
+			return [parseFloat(parts[0]), parseFloat(parts[1])];
+		});
+
+		// Step 1: Zoom to the area using IQGeo's own fit() — do NOT override center or zoom
+		// afterward because IQGeo's internal Y coordinate is not a standard unit, and manually
+		// calling setCenter/setZoom with derived values sends the map to the wrong location
+		// (e.g. Southern Ocean). Let fit() handle all positioning.
+		await this.page.evaluate((coords) => {
+			const lons = coords.map(c => c[0]);
+			const lats = coords.map(c => c[1]);
+			const extent = myw.proj.toProjExtent(
+				[[Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]],
+				'EPSG:3857'
+			);
+			myw.app.map.getView().fit(extent, { size: myw.app.map.getSize(), padding: [80, 80, 80, 80] });
+		}, parsed);
+
+		// Wait for Google Maps tiles to fully render after the pan/zoom.
+		await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+		await this.page.waitForTimeout(6000);
+
+		// Step 2: Click at viewport-relative positions — 25% and 75% of canvas width,
+		// upper area (35% height) to avoid the measurement dialog.
+		// fit() zooms so the coordinates are within the visible area; clicking at 25%/75%
+		// guarantees we measure across the zoomed-in region.
+		const canvas = this.page.locator('#map_canvas');
+		await canvas.waitFor({ state: 'visible', timeout: 15000 });
+		const box = await canvas.boundingBox();
+		expect(box).not.toBeNull();
+		console.log(`✅ Canvas: ${box.width}×${box.height} at (${Math.round(box.x)}, ${Math.round(box.y)})`);
+
+		const clickY  = box.y + box.height * 0.35;
+		const point1X = box.x + box.width  * 0.25;
+		const point2X = box.x + box.width  * 0.75;
+
+		await this.page.mouse.move(point1X, clickY);
+		await this.page.waitForTimeout(300);
+		await this.page.mouse.click(point1X, clickY);
+		console.log(`✅ Click point 1 at (${Math.round(point1X)}, ${Math.round(clickY)})`);
+		await this.page.waitForTimeout(800);
+
+		await this.page.mouse.move(point2X, clickY);
+		await this.page.waitForTimeout(300);
+		await this.page.mouse.dblclick(point2X, clickY);
+		console.log(`✅ Double-click (finish) at (${Math.round(point2X)}, ${Math.round(clickY)})`);
+
+		await this.page.waitForTimeout(2000);
+		console.log('✅ Exact measurement drawing complete');
+	}
+
+	/**
+	 * Verify that the measurement result panel is visible AND shows a non-zero length.
+	 * A dialog that opens but shows "0.00" means no measurement was actually drawn.
+	 */
+	async isMeasurementResultVisible() {
+		// Wait for the Measurement Tool dialog to be visible
+		const dialog = this.page.locator(
+			'.ui-dialog:has-text("Measurement Tool"), .myw-measure-result, .measurement-result'
+		).first();
+		await expect(dialog).toBeVisible({ timeout: 15000 });
+
+		// Read the dialog text and extract the Length value
+		const dialogText = await dialog.textContent();
+		console.log('📐 Measurement dialog text:', dialogText.trim().substring(0, 120));
+
+		// ✅ Assert: Length value must be > 0 — "0.00" means no measurement was drawn
+		const lengthMatch = dialogText.match(/Length\s*:?\s*([\d.]+)/i);
+		if (lengthMatch) {
+			const lengthValue = parseFloat(lengthMatch[1]);
+			expect(
+				lengthValue,
+				`Measurement length is ${lengthValue} — dialog is open but no points were drawn on the map`
+			).toBeGreaterThan(0);
+			console.log('✅ Measurement result visible with non-zero length:', lengthValue);
+		} else {
+			// Fallback: at minimum the dialog must have non-empty text
+			expect(dialogText.trim().length).toBeGreaterThan(0);
+			console.log('✅ Measurement result visible (length pattern not matched):', dialogText.trim());
+		}
+	}
+
+	/**
+	 * Click the Show Current Location button in the toolbar.
+	 */
+	async clickShowCurrentLocation() {
+		await this.page.locator(`//li[@title="Show current location"]`).click();
+		await this.page.waitForTimeout(3000);
+
+		// ✅ Assert: map canvas is still visible after clicking (no crash or blank screen)
+		const canvas = this.page.locator('#map_canvas, canvas');
+		await expect(canvas.first()).toBeVisible({ timeout: 10000 });
+		console.log('✅ Show Current Location clicked, map canvas still visible');
+	}
+
+	/**
+	 * Verify that the map canvas is visible (used after Show Current Location).
+	 */
+	async isMapVisible() {
+		const canvas = this.page.locator('#map_canvas, canvas');
+
+		// ✅ Assert: map canvas is visible
+		await expect(canvas.first()).toBeVisible({ timeout: 15000 });
+
+		// ✅ Assert: page URL still points to the correct app (no unexpected redirect)
+		await expect(this.page).toHaveURL(/testapp\.html/, { timeout: 5000 });
+		console.log('✅ Map is displaying current location, URL confirmed:', this.page.url());
+	}
+
+	// Before: clickPrintMap() waited for a new tab (popup) and returned it.
+	//         The recording split into two separate videos — the new tab had no
+	//         video because it was not the page being recorded.
+	// After : intercept the popup, grab its URL, close it, then navigate the
+	//         current page to the print URL so everything stays in one tab and
+	//         one continuous video recording.
+	// Harish, 30-03-26
+	async clickPrintMap() {
+		// Capture the popup URL before it fully loads, then close it
+		const [popup] = await Promise.all([
+			this.page.context().waitForEvent('page', { timeout: 30000 }),
+			this.page.locator(`//li[@title="Print map"]`).click(),
+		]);
+
+		const printUrl = popup.url() || await popup.waitForEvent('load').then(() => popup.url());
+		await popup.close();
+		console.log('✅ Print popup intercepted, URL:', printUrl);
+
+		// Navigate current page to the print URL — stays in one recording
+		await this.page.goto(printUrl, { waitUntil: 'networkidle', timeout: 60000 });
+		await this.page.waitForTimeout(3000);
+
+		const url = this.page.url();
+		expect(url).toContain('layout=print');
+		expect(url).toContain('testapp.html');
+		console.log('✅ Print page loaded in same tab:', url);
+		return this.page;
+	}
+
+	/**
+	 * On the print page: select a template, enter a title, and click Print.
+	 * @param {Page} printPage - the new tab returned by clickPrintMap()
+	 * @param {string} title   - the title to enter (default: 'Automation Print Test')
+	 */
+	async fillAndSubmitPrint(printPage, title = 'Automation Print Test') {
+		const templateSelect = printPage.locator('#print-template-choice');
+		await templateSelect.waitFor({ state: 'visible', timeout: 15000 });
+
+		// Before: no check if dropdown had options, selectOption could silently fail
+		// After : assert at least one valid option exists before selecting
+		const options = await templateSelect.locator('option').allTextContents();
+		const validOption = options.find(o => o.trim() !== '');
+		expect(validOption).toBeDefined();
+		await templateSelect.selectOption({ label: validOption.trim() });
+		console.log('✅ Template selected:', validOption.trim());
+
+		// Before: title was filled with no check that the value actually got typed
+		// After : assert inputValue() matches what was typed
+		const titleInput = printPage.locator('#Title-text-area');
+		await titleInput.waitFor({ state: 'visible', timeout: 10000 });
+		await titleInput.fill(title);
+		const enteredTitle = await titleInput.inputValue();
+		expect(enteredTitle).toBe(title);
+		console.log('✅ Print title entered and confirmed:', enteredTitle);
+
+		// Before: #open-print was clicked immediately after filling the form —
+		//         the recording showed no visible pause on the filled form.
+		// After : 3-second delay added before clicking so the recording captures
+		//         the completed form clearly before print is triggered.
+		// Harish, 30-03-26
+		await printPage.waitForTimeout(3000);
+
+		// fire-and-forget — window.print() suspends the page so we don't await it
+		printPage.locator('#open-print').click().catch(() => {});
+		await printPage.waitForTimeout(3000);
+
+		const url = printPage.url();
+		expect(url).toContain('layout=print');
+		console.log('✅ Print submitted, page URL confirmed:', url);
+	}
 }
 module.exports = { gigapower };

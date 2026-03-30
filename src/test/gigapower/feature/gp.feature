@@ -295,7 +295,84 @@ Then User should be able to see the 'VIEW LOGS' Button in the UPDATE section
      And Click on Login
      Then User should be navigated to Landing page
 
+# ------------------------------------------------------------------------------------------
 
+  @gpIndexPageValidation
+  Scenario: User should be able to see key applications on the index page
+     Given User Opens the "IQGeo URL"
+     When User inputs valid "username" and "password"
+     And Click on Login
+     Then User should be navigated to Landing page
+     And User should see the "Configuration" application on the index page
+     And User should see the "Comms" application on the index page
+     And User should see the "Standard" application on the index page
+
+# ------------------------------------------------------------------------------------------
+
+  @gpConfigPage
+  Scenario: User should be able to navigate to the Configuration page and see all sections
+     Given User Opens the "IQGeo URL"
+     When User inputs valid "username" and "password"
+     And Click on Login
+     Then User should be navigated to Landing page
+     When User clicks on the "Configuration" application
+     Then User should be navigated to the Configuration page
+     And User should see "Applications" section in Configuration
+     And User should see "Roles" section in Configuration
+     And User should see "Users" section in Configuration
+     And User should see "Features" section in Configuration
+     And User should see "Layers" section in Configuration
+     And User should see "Settings" section in Configuration
+
+# ------------------------------------------------------------------------------------------
+
+  @gpOpenApplicationByHref
+  Scenario: User should be able to open Configuration using openApplication by href
+     Given User Opens the "IQGeo URL"
+     When User inputs valid "username" and "password"
+     And Click on Login
+     Then User should be navigated to Landing page
+     When User opens application by href "config.html"
+     Then User should be navigated to the Configuration page
+
+
+@gpMeasurement
+  Scenario: User should be able to view length and area in selected units
+    Given User is in the Network Manager application for Measurement
+    When User clicks on the Measurement tool
+    And User clicks on the map starting from one feature to another
+    Then User should be able to view length and area in selected units
+
+# ------------------------------------------------------------------------------------------
+
+  @gpExactMeasurement
+  Scenario: User should be able to measure exact distance between two coordinates
+    Given User is in the Network Manager application for Exact Measurement
+    When User searches for "Mumbai" to navigate the map
+    And User clicks on the Measurement tool for exact measurement
+    And User searches for "Navi Mumbai" as the second location
+    And User draws measurement on the current map view
+    Then User should see the exact distance logged in selected units
+
+# ------------------------------------------------------------------------------------------
+
+  @gpShowCurrentLocation
+  Scenario: User should be navigated to the current location on map
+    Given User is in the Network Manager application for Show Current Location
+    When User clicks on Show Current Location
+    Then User should be navigated to the current location on map
+
+# ------------------------------------------------------------------------------------------
+
+  @gpPrint
+  Scenario: Selected map region should be printed
+    Given User is in the Network Manager application for Print
+    When User clicks on Print
+    And A new window opens with the opened map region
+    And User selects the template format and enters the title and clicks on print
+    Then Selected map region should be printed
+
+# ------------------------------------------------------------------------------------------
 
 @gpDebugMethods
 Scenario: Debug gigapower page object methods

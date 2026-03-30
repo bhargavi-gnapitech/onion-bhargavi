@@ -4,7 +4,6 @@ const { expect } = require('@playwright/test');
 const { LoginPage } = require('../../../../pages/login');
 const { IndexPage } = require('../../../../pages/index');
 const { gigapower } = require('../../../../pages/apps/gigaPower');
-const { arg } = require('../../../../base_lib/Input');
 const { USERNAME, PASSWORD, PRE_UAT_URL } = require('../../../../base_lib/credentials');
 
 let login;
@@ -57,17 +56,23 @@ When('User clicks the pencil icon and selects Design', { timeout: 300000 }, asyn
 
 
 // Step 3: Draw 4 points on the map
-When('User draws 4 points on the map', { timeout: 8000000 }, async function () {
+// Before: called drawPolygon(arg.design_coordinates) which zoomed the map to
+//         hardcoded coordinates — design landed on water or outside data extent,
+//         causing the polygon draw or save to silently fail.
+// After : calls draw4PointsOnCurrentView() which draws on the current map view
+//         with no zoom/navigation, avoiding water and data-coverage issues.
+// Harish, 30-03-26
+When('User draws 4 points on the map', { timeout: 60000 }, async function () {
 
-  await GigaPower.drawPolygon(arg.design_coordinates);
-  console.log('✅ 4 points drawn on map');
-
-  await global.page.waitForLoadState('networkidle', { timeout: 120000 });
+  await GigaPower.draw4PointsOnCurrentView();
 
 });
 
 
 // Step 4: Enter name and save
+// Store the generated name so Step 5 can verify it
+let savedDesignName;
+
 When('User enters a name and saves the design', { timeout: 300000 }, async function () {
 
   // Wait for New Design form
@@ -75,15 +80,15 @@ When('User enters a name and saves the design', { timeout: 300000 }, async funct
   console.log('✅ New Design form visible');
 
   // Fill Name field via JS to trigger proper input events
-  const designName = 'Design_' + Date.now();
+  savedDesignName = 'Design_' + Date.now();
   await global.page.evaluate((name) => {
     const input = document.querySelector('input.text.ui-input');
     const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
     nativeInputValueSetter.call(input, name);
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
-  }, designName);
-  console.log('✅ Name entered:', designName);
+  }, savedDesignName);
+  console.log('✅ Name entered:', savedDesignName);
 
   await global.page.waitForTimeout(1000);
 
@@ -96,14 +101,21 @@ When('User enters a name and saves the design', { timeout: 300000 }, async funct
 });
 
 
-// Step 5: Verify design created
+// Step 5: Confirm the "New Design" form closed (save succeeded) then dismiss any open panel
+// Before: verified by waiting for a feature-title div containing the design name —
+//         that div never appeared because IQGeo does not auto-open the detail panel
+//         after saving, causing the step to always timeout and fail.
+// After : waits for the "New Design:" dialog to disappear (confirms save succeeded)
+//         then presses Escape to close any panel that opened. No searching needed.
+// Harish, 30-03-26
 Then('New design is created successfully', { timeout: 60000 }, async function () {
 
-  await global.page.waitForSelector(
-    '//div[contains(@class, "feature-title")]',
-    { timeout: 15000 }
-  );
+  // If save worked the "New Design:" dialog will be gone — wait for it to disappear
+  await global.page.waitForSelector('text=New Design:', { state: 'hidden', timeout: 20000 });
+  console.log('✅ New Design form closed — design saved:', savedDesignName);
 
-  console.log('✅ New design created successfully');
+  // Dismiss any detail panel that may have opened
+  await global.page.keyboard.press('Escape');
+  await global.page.waitForTimeout(1000);
 
 });

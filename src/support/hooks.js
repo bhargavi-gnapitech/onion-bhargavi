@@ -147,27 +147,48 @@ After({ timeout: 20000 }, async function (scenario) {
 		scenario.result.status === 'PASSED' ||
 		scenario.result.status === 'FAILED'
 	) {
-		screenshot = await global.page.screenshot();
-		screenshotBase64 = screenshot.toString('base64');
-		await this.attach(screenshot || screenshotBase64, 'image/png');
+		const openPages = global.context
+			? global.context.pages().filter((p) => !p.isClosed())
+			: global.page && !global.page.isClosed()
+				? [global.page]
+				: [];
 
-		const video = await global.page.video();
-		console.log(
-			'Video recording status:',
-			video ? 'Recorded' : 'Not recorded'
-		);
+		const activePage = openPages.length
+			? openPages[openPages.length - 1]
+			: null;
 
-		// const videoPath = video ? await video.path() : null;
+		if (activePage) {
+			screenshot = await activePage.screenshot();
+			screenshotBase64 = screenshot.toString('base64');
+			await this.attach(screenshot || screenshotBase64, 'image/png');
+		}
 
-		// if (videoPath) {
-		// 	console.log(`Video recorded at: ${videoPath}`);
-		// 	const videoBuffer = fs.readFileSync(videoPath);
-		// 	await this.attach(videoBuffer, 'video/webm');
-		// } else {
-		// 	console.log('No video recorded for this test.');
-		// }
+		const videoArtifacts = openPages.map((page, index) => ({
+			index,
+			page,
+			video: page.video(),
+		}));
 
-		await global.page.close(); // Ensures the video is saved
+		const videoPaths = [];
+		for (const artifact of videoArtifacts) {
+			try {
+				if (!artifact.page.isClosed()) {
+					await artifact.page.close();
+				}
+
+				const videoPath = artifact.video ? await artifact.video.path() : null;
+				if (videoPath && fs.existsSync(videoPath)) {
+					videoPaths.push(videoPath);
+					const videoBuffer = fs.readFileSync(videoPath);
+					await this.attach(videoBuffer, 'video/webm');
+					console.log(`Video recording status [tab ${artifact.index + 1}]: Recorded at ${videoPath}`);
+				} else {
+					console.log(`Video recording status [tab ${artifact.index + 1}]: Not recorded`);
+				}
+			} catch (videoErr) {
+				console.log(`Error while attaching video for tab ${artifact.index + 1}:`, videoErr.message);
+			}
+		}
 
 		const scenarioData = {
 			user_name: gitUser, // Git user
@@ -222,8 +243,16 @@ After({ timeout: 20000 }, async function (scenario) {
 			const responseData = await response.json();
 			console.log('API response:', responseData);
 
-			// fs.rmSync(videoPath, { recursive: true, force: true });
-			fs.unlink(videoPath);
+			for (const videoPath of videoPaths) {
+				if (videoPath && fs.existsSync(videoPath)) {
+					try {
+						fs.unlinkSync(videoPath);
+						console.log('Video file deleted after upload:', videoPath);
+					} catch (unlinkErr) {
+						console.log('Could not delete video file (will be cleaned up later):', unlinkErr.message);
+					}
+				}
+			}
 		} catch (err) {
 			console.log('Error posting scenario data to API:', err);
 		}
