@@ -348,10 +348,16 @@ Then User should be able to see the 'VIEW LOGS' Button in the UPDATE section
   @gpExactMeasurement
   Scenario: User should be able to measure exact distance between two coordinates
     Given User is in the Network Manager application for Exact Measurement
-    When User searches for "Mumbai" to navigate the map
-    And User clicks on the Measurement tool for exact measurement
-    And User searches for "Navi Mumbai" as the second location
-    And User draws measurement on the current map view
+    When User clicks on the Measurement tool for exact measurement
+    And User clicks on the map to start measurement
+    And User right-clicks on the map to open the context menu
+    And User clicks on Go Coordinates from the context menu
+    And User enters the first coordinate "12.9716" "77.5946"
+    And User closes the Coordinates dialog
+    And User right-clicks on the map to open the context menu
+    And User clicks on Go Coordinates from the context menu
+    And User enters the second coordinate "13.0827" "80.2707"
+    And User changes the length unit to "km"
     Then User should see the exact distance logged in selected units
 
 # ------------------------------------------------------------------------------------------
@@ -371,6 +377,72 @@ Then User should be able to see the 'VIEW LOGS' Button in the UPDATE section
     And A new window opens with the opened map region
     And User selects the template format and enters the title and clicks on print
     Then Selected map region should be printed
+
+# ------------------------------------------------------------------------------------------
+
+@gpNetworkTrace
+Scenario: User should be able to view the network using Network Trace Tool
+  Given User is in the Network Manager application for Network Trace
+  When User selects a feature on the map
+  And User clicks on the Network trace tool
+  Then Network Trace Tool dialog should be visible with feature details
+  When User clicks on the Trace button
+  Then User closes the Network Trace Tool dialog
+
+# ------------------------------------------------------------------------------------------
+
+@gpSchematicView
+Scenario: User should be able to view the schematic design of selected feature
+  Given User is in the Network Manager application for Schematic View
+  When User selects a feature on the map
+  And User clicks on Schematic view
+  Then User should be able to view the schematic design of selected feature
+
+# ------------------------------------------------------------------------------------------
+
+@gpToolsPalette
+Scenario: User should be able to view the added tools to the application in a side panel
+  Given User is in the Network Manager application for Tools Palette
+  When User clicks on Tools Palette
+  Then User should be able to view the added tools to the application in a side panel
+
+# ------------------------------------------------------------------------------------------
+
+@gpToolsPaletteOptions
+Scenario: User should be able to verify each Tools Palette option works successfully
+  Given User is in the Network Manager application for Tools Palette
+  When User clicks on Tools Palette
+  Then User should be able to view the added tools to the application in a side panel
+  And User verifies "Spec Manager" tool is accessible
+  And User verifies "Multi Connect" tool is accessible
+  And User verifies "Address Report" tool is accessible
+  And User verifies "Requests" tool is accessible
+
+# ------------------------------------------------------------------------------------------
+
+@gpCreateDesignExact
+Scenario: User should be able to create a design using exact coordinates
+  Given User is in the Network Manager application for Create Design Exact
+  When User clicks the pencil icon and selects Design mode
+  And User clicks on the map to start the design boundary
+  And User right-clicks on the map to add a design boundary point
+  And User clicks on Go Coordinates to set a design point
+  And User overwrites the first design point with coordinate "12.9716" "77.5946"
+  And User closes the design coordinates dialog
+  And User right-clicks on the map to add a design boundary point
+  And User clicks on Go Coordinates to set a design point
+  And User enters design point coordinate "13.8000" "77.4000"
+  And User closes the design coordinates dialog
+  And User right-clicks on the map to add a design boundary point
+  And User clicks on Go Coordinates to set a design point
+  And User enters design point coordinate "13.2000" "80.3000"
+  And User closes the design coordinates dialog
+  And User right-clicks on the map to add a design boundary point
+  And User clicks on Go Coordinates to set a design point
+  And User enters design point coordinate "12.8000" "80.1000"
+  And User closes the design coordinates dialog
+  And User enters the design name "ExactDesign" and saves
+  Then New design is created with exact coordinates successfully
 
 # ------------------------------------------------------------------------------------------
 

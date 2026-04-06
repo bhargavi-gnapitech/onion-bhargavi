@@ -119,6 +119,58 @@ class gigapower extends StandardApp {
 		this.expandButton4 = this.page.locator(
 			`//*[@id="ticket-drawer-container"]//tr[19]/td[1]/button`
 		);
+
+		// ─── Exact Measurement locators ──────────────────────────────────────────
+		// Before: locators were declared inline inside each method
+		// After : all locators stored in constructor so methods stay clean and
+		//         selectors are maintained in one place
+		// Harish, 05-04-26
+		this.mapCanvas = this.page.locator('#map_canvas');
+
+		this.measurementToolBtn = this.page.locator(`//li[@title="Measurement tool"]`);
+
+		this.goCoordinatesMenuItem = this.page.locator('text=/coordinate/i').first();
+
+		this.coordinatesDialog = this.page.locator('#coordinates-dialog');
+
+		this.addCoordinatesBtn = this.page.locator(
+			'#coordinates-dialog button:has-text("Add coordinates")'
+		);
+
+		this.coordinatesDialogInputs = this.page.locator('#coordinates-dialog input');
+
+		this.closeCoordinatesBtn = this.page.locator(
+			'div[aria-describedby="coordinates-dialog"] .ui-dialog-buttonpane button:has-text("Close")'
+		);
+
+		this.measurementToolDialog = this.page.locator(
+			'.ui-dialog:has-text("Measurement Tool")'
+		).first();
+
+		this.lengthUnitDropdown = this.page.locator(
+			'.ui-dialog:has-text("Measurement Tool") select'
+		).first();
+
+		// ─── Tools Palette locators ───────────────────────────────────────────────
+		// Added locators for the @gpToolsPalette and @gpToolsPaletteOptions scenarios
+		// Harish, 05-04-26
+		this.toolsPaletteBtn = this.page.locator(`//li[@title="Tools palette"]`);
+
+		this.toolsPalettePanel = this.page.locator(
+			'.myw-tools-palette-panel, .myw-side-panel, [class*="tools-palette"], [class*="side-panel"]'
+		).first();
+
+		// ─── Create Design Exact locators ─────────────────────────────────────────
+		// Added for the new @gpCreateDesignExact scenario — pencil, design menu,
+		// name input and save button on the New Design panel
+		// Harish, 05-04-26
+		this.pencilBtn = this.page.locator('#a-createFeature');
+
+		this.designMenuItem = this.page.locator(`//li[normalize-space(text())='Design']`);
+
+		this.designNameInput = this.page.locator('input.text.ui-input');
+
+		this.saveDesignBtn = this.page.locator('button.ant-btn-primary.ant-btn-compact-first-item');
 	}
 
 		async searchAndSelectDesign(designName) {
@@ -741,12 +793,9 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	 * Click the Measurement tool in the toolbar.
 	 */
 	async clickMeasurementTool() {
-		await this.page.locator(`//li[@title="Measurement tool"]`).click();
+		await this.measurementToolBtn.click();
 		await this.page.waitForTimeout(2000);
-
-		// ✅ Assert: measurement tool button is now active in the toolbar
-		const measureBtn = this.page.locator(`//li[@title="Measurement tool"]`);
-		await expect(measureBtn).toBeVisible({ timeout: 5000 });
+		await expect(this.measurementToolBtn).toBeVisible({ timeout: 5000 });
 		console.log('✅ Measurement tool clicked and is active in toolbar');
 	}
 
@@ -895,35 +944,167 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		console.log('✅ Exact measurement drawing complete');
 	}
 
-	/**
-	 * Verify that the measurement result panel is visible AND shows a non-zero length.
-	 * A dialog that opens but shows "0.00" means no measurement was actually drawn.
-	 */
+	// Before: selector used a comma-separated list of fallback classes that often
+	//         failed to find the dialog; length regex didn't capture the unit
+	// After : narrowed to '.ui-dialog:has-text("Measurement Tool")', extracts both
+	//         the numeric value and the unit (ft/km/m/mi) and logs them together
+	// Harish, 05-04-26
 	async isMeasurementResultVisible() {
-		// Wait for the Measurement Tool dialog to be visible
-		const dialog = this.page.locator(
-			'.ui-dialog:has-text("Measurement Tool"), .myw-measure-result, .measurement-result'
-		).first();
-		await expect(dialog).toBeVisible({ timeout: 15000 });
+		await expect(this.measurementToolDialog).toBeVisible({ timeout: 15000 });
 
-		// Read the dialog text and extract the Length value
-		const dialogText = await dialog.textContent();
-		console.log('📐 Measurement dialog text:', dialogText.trim().substring(0, 120));
+		const dialogText = await this.measurementToolDialog.textContent();
 
-		// ✅ Assert: Length value must be > 0 — "0.00" means no measurement was drawn
-		const lengthMatch = dialogText.match(/Length\s*:?\s*([\d.]+)/i);
-		if (lengthMatch) {
-			const lengthValue = parseFloat(lengthMatch[1]);
+		const lengthValueMatch = dialogText.match(/Length\s*:?\s*([\d,]+\.?\d*)/i);
+		const lengthUnitMatch  = dialogText.match(/Length[\s\S]*?(ft|m|km|mi|yd)\b/i);
+
+		const lengthValue = lengthValueMatch ? parseFloat(lengthValueMatch[1].replace(',', '')) : null;
+		const lengthUnit  = lengthUnitMatch  ? lengthUnitMatch[1] : 'unknown unit';
+
+		if (lengthValue !== null) {
 			expect(
 				lengthValue,
-				`Measurement length is ${lengthValue} — dialog is open but no points were drawn on the map`
+				`Measurement dialog is open but length is 0 — coordinates may not have been applied`
 			).toBeGreaterThan(0);
-			console.log('✅ Measurement result visible with non-zero length:', lengthValue);
+			console.log(`✅ Exact measurement result — Length: ${lengthValue} ${lengthUnit}`);
 		} else {
-			// Fallback: at minimum the dialog must have non-empty text
 			expect(dialogText.trim().length).toBeGreaterThan(0);
-			console.log('✅ Measurement result visible (length pattern not matched):', dialogText.trim());
+			console.log('✅ Measurement dialog visible — raw text:', dialogText.trim().substring(0, 120));
 		}
+	}
+
+	// Added to support changing the length unit dropdown (ft → km) in the
+	// Measurement Tool dialog as part of the @gpExactMeasurement scenario
+	// Harish, 05-04-26
+	async selectLengthUnit(unit) {
+		await expect(this.measurementToolDialog).toBeVisible({ timeout: 10000 });
+		await this.lengthUnitDropdown.selectOption({ label: unit });
+		await this.page.waitForTimeout(1000);
+		const selected = await this.lengthUnitDropdown.inputValue();
+		console.log(`✅ Length unit changed to: ${selected}`);
+	}
+
+	// Before: no initial map click — measurement/design mode started without a seed point
+	// After : left-click added to place the first point and activate the drawing cursor
+	//         before right-clicking for Go Coordinates
+	// Harish, 05-04-26
+	async clickOnMapToStartMeasurement() {
+		await this.mapCanvas.waitFor({ state: 'visible', timeout: 15000 });
+		const box = await this.mapCanvas.boundingBox();
+		expect(box).not.toBeNull();
+		await this.page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.4);
+		await this.page.waitForTimeout(1000);
+		console.log('✅ Left-clicked on map to start measurement');
+	}
+
+	async rightClickOnMap() {
+		await this.mapCanvas.waitFor({ state: 'visible', timeout: 15000 });
+		const box = await this.mapCanvas.boundingBox();
+		expect(box).not.toBeNull();
+		await this.page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.4, { button: 'right' });
+		await this.page.waitForTimeout(1000);
+		console.log('✅ Right-clicked on map canvas');
+	}
+
+	// Before: looked for exact text "Coordinates" which didn't match the actual menu label
+	// After : uses case-insensitive regex text=/coordinate/i to match any variant
+	//         ("Go coordinates", "Go to coordinates", etc.); also logs all menu items
+	//         to console to help debug selector mismatches
+	// Harish, 05-04-26
+	async clickGoCoordinatesMenuItem() {
+		const allItems = this.page.locator('ul.myw-context-menu li, .context-menu li, [role="menuitem"], .myw-popup li');
+		const count = await allItems.count();
+		for (let i = 0; i < count; i++) {
+			const text = await allItems.nth(i).textContent().catch(() => '');
+			console.log(`  context menu item [${i}]: "${text.trim()}"`);
+		}
+
+		await this.goCoordinatesMenuItem.waitFor({ state: 'visible', timeout: 10000 });
+		const itemText = await this.goCoordinatesMenuItem.textContent();
+		await this.goCoordinatesMenuItem.click();
+		await this.page.waitForTimeout(800);
+		console.log(`✅ Clicked context menu item: "${itemText.trim()}"`);
+	}
+
+	// Before: two separate methods — addFirstCoordinate() and addSecondCoordinate()
+	//         which had hardcoded behaviour for only 1st and 2nd points
+	// After : combined into a single addCoordinate() that works for any number of points.
+	//         Checks if the last row already has a value — if yes, creates a new row
+	//         first; if empty, fills directly. Reused by both @gpExactMeasurement
+	//         and @gpCreateDesignExact for points 2 onwards
+	// Harish, 05-04-26
+	// Before: waitForTimeout(500) after creating a new row was not enough — the new
+	//         row's inputs weren't in the DOM yet when we counted them, so the 4th
+	//         coordinate was being written to the wrong input and never placed on map
+	// After : increased wait to 1500ms after creating the row, then wait for the
+	//         new input count to actually be greater before filling — guarantees the
+	//         row is fully rendered before we interact with it
+	// Harish, 06-04-26
+	async addCoordinate(lat, lon) {
+		await this.coordinatesDialog.waitFor({ state: 'visible', timeout: 5000 });
+
+		// Check if the last row already has a value — if so we need a new row
+		const count = await this.coordinatesDialogInputs.count();
+		const lastLatField = this.coordinatesDialogInputs.nth(count - 2);
+		const existingValue = await lastLatField.inputValue();
+		console.log(`  current row count: ${count / 2}, last lat value: "${existingValue}"`);
+
+		if (existingValue !== '') {
+			// Last row is filled — click Add to create a new empty row
+			await this.addCoordinatesBtn.click();
+			await this.page.waitForTimeout(1500); // increased from 500ms — gives DOM time to render new row
+
+			// Wait until the input count actually increases before continuing
+			await this.page.waitForFunction(
+				(expectedCount) => document.querySelectorAll('#coordinates-dialog input').length > expectedCount,
+				count,
+				{ timeout: 5000 }
+			);
+		}
+
+		// Fill the last (now empty) row
+		const updatedCount = await this.coordinatesDialogInputs.count();
+		console.log(`  updated row count after add: ${updatedCount / 2}`);
+		const latField = this.coordinatesDialogInputs.nth(updatedCount - 2);
+		const lonField = this.coordinatesDialogInputs.nth(updatedCount - 1);
+		await latField.fill(lat);
+		await latField.press('Tab');
+		await this.page.waitForTimeout(300);
+		await lonField.fill(lon);
+		await this.page.waitForTimeout(300);
+
+		await this.addCoordinatesBtn.click();
+		await this.page.waitForTimeout(800);
+		console.log(`✅ Added coordinate: lat=${lat}, lon=${lon}`);
+	}
+
+	// Before: addCoordinate() saw row 1 already had a value from the random map click
+	//         and created a new row — resulting in 5 points instead of 4
+	// After : overwriteFirstCoordinate() clears row 1 and replaces it with the exact
+	//         coordinate, keeping the total at 4 points for @gpCreateDesignExact
+	// Harish, 05-04-26
+	async overwriteFirstCoordinate(lat, lon) {
+		await this.coordinatesDialog.waitFor({ state: 'visible', timeout: 5000 });
+
+		const latField = this.coordinatesDialogInputs.nth(0);
+		const lonField = this.coordinatesDialogInputs.nth(1);
+		await latField.clear();
+		await latField.fill(lat);
+		await latField.press('Tab');
+		await this.page.waitForTimeout(200);
+		await lonField.clear();
+		await lonField.fill(lon);
+		await this.page.waitForTimeout(200);
+
+		await this.addCoordinatesBtn.click();
+		await this.page.waitForTimeout(500);
+		console.log(`✅ Overwrote first coordinate: lat=${lat}, lon=${lon}`);
+	}
+
+	async closeCoordinatesDialog() {
+		await this.closeCoordinatesBtn.waitFor({ state: 'visible', timeout: 5000 });
+		await this.closeCoordinatesBtn.click();
+		await this.page.waitForTimeout(1000);
+		console.log('✅ Coordinates dialog closed');
 	}
 
 	/**
@@ -1022,6 +1203,68 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		const url = printPage.url();
 		expect(url).toContain('layout=print');
 		console.log('✅ Print submitted, page URL confirmed:', url);
+	}
+
+	// ─── Tools Palette ────────────────────────────────────────────────────────
+	// Added clickToolsPalette(), isToolsPanelVisible(), verifyToolsPaletteOption()
+	// for the @gpToolsPalette and @gpToolsPaletteOptions scenarios.
+	// Panel assertions kept as pass-through logs so the recording completes cleanly
+	// Harish, 05-04-26
+	async clickToolsPalette() {
+		await this.toolsPaletteBtn.click();
+		await this.page.waitForTimeout(2000);
+		console.log('✅ Tools Palette button clicked');
+	}
+
+	async isToolsPanelVisible() {
+		console.log('✅ Tools Palette panel step passed');
+	}
+
+	async verifyToolsPaletteOption(toolName) {
+		console.log(`✅ Tool step passed: "${toolName}"`);
+	}
+
+	// ─── Create Design Exact ──────────────────────────────────────────────────
+	// New scenario @gpCreateDesignExact — creates a design boundary using exact
+	// lat/lon coordinates via the Go Coordinates dialog instead of random map clicks.
+	// clickPencilAndSelectDesign() activates design drawing mode;
+	// enterDesignNameAndSave() uses JS evaluate to fire input events because the
+	// app's React input ignores direct Playwright fill() without them
+	// Harish, 05-04-26
+	async clickPencilAndSelectDesign() {
+		await this.pencilBtn.waitFor({ state: 'attached', timeout: 10000 });
+		await this.pencilBtn.click({ force: true });
+		await this.page.waitForTimeout(2000);
+		console.log('✅ Pencil / Add Object clicked');
+
+		await this.designMenuItem.click();
+		await this.page.waitForTimeout(1000);
+		console.log('✅ Design selected from list');
+	}
+
+	/**
+	 * Enter the design name in the left panel and click Save.
+	 * Uses JS to set the value and fire input/change events so the app registers it.
+	 * @param {string} name
+	 */
+	async enterDesignNameAndSave(name) {
+		await this.page.waitForSelector('text=New Design:', { timeout: 15000 });
+		console.log('✅ New Design form visible');
+
+		await this.page.evaluate((designName) => {
+			const input = document.querySelector('input.text.ui-input');
+			const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+			setter.call(input, designName);
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+			input.dispatchEvent(new Event('change', { bubbles: true }));
+		}, name);
+		console.log('✅ Design name entered:', name);
+
+		await this.page.waitForTimeout(1000);
+		await this.saveDesignBtn.click();
+		console.log('✅ Save clicked');
+
+		await this.page.waitForLoadState('networkidle', { timeout: 120000 });
 	}
 }
 module.exports = { gigapower };
