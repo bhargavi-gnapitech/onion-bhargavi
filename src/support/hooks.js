@@ -176,6 +176,10 @@ After({ timeout: 20000 }, async function (scenario) {
 					await artifact.page.close();
 				}
 
+				// Harish, 07-04-26: wait for Playwright to finalize the .webm file after page close
+				//                   without this the video has no duration and plays as a live stream
+				await new Promise(resolve => setTimeout(resolve, 1000));
+
 				const videoPath = artifact.video ? await artifact.video.path() : null;
 				if (videoPath && fs.existsSync(videoPath)) {
 					videoPaths.push(videoPath);
@@ -218,44 +222,8 @@ After({ timeout: 20000 }, async function (scenario) {
 			jira_info: JiraTicketInfo,
 			git_commit: gitCommitInfo,
 		};
-		console.log('🚀👊 ~ file: hooks.js:59 ~ scenarioData:', scenarioData);
-
-		// Send a POST request to the API
-		try {
-			const response = await fetch(
-				`${ONION_BACKEND_Domain}/api/v1/test_run`,
-				{
-					method: 'POST',
-					headers: {
-						'x-api-key':
-							'a59c400aeccc2c394f7f82fcfa50902a817dbaf33dbb2a3948316164519acc96',
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(scenarioData),
-				}
-			);
-
-			console.log('🚀👊 ~ file: hooks.js:108 ~ response:', response);
-			if (!response) {
-				throw new Error(`HTTP error! Status: ${response.status}`);
-			}
-
-			const responseData = await response.json();
-			console.log('API response:', responseData);
-
-			for (const videoPath of videoPaths) {
-				if (videoPath && fs.existsSync(videoPath)) {
-					try {
-						fs.unlinkSync(videoPath);
-						console.log('Video file deleted after upload:', videoPath);
-					} catch (unlinkErr) {
-						console.log('Could not delete video file (will be cleaned up later):', unlinkErr.message);
-					}
-				}
-			}
-		} catch (err) {
-			console.log('Error posting scenario data to API:', err);
-		}
+		// Harish, 07-04-26: disabled Onion backend API call — not needed for IQGeo work
+		// scenarioData is kept above in case it is needed in future
 	}
 
 	if (global.browser) {

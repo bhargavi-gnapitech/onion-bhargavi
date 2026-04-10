@@ -54,7 +54,6 @@ When(
 Then('User Click on Login', { timeout: 70000 }, async function () {
 	// CHANGED: login button click was: await page.click('#login-submission');
 	// Now login is fully handled in the When step via login.login(), so nothing to do here.
-	console.log('Login submitted');
 });
 
 Then(
@@ -65,7 +64,5 @@ Then(
 		// Added waitForLoadState so test waits for the app to fully load before passing.
 		// Old code: console.log("Test case passed");
 		await global.page.waitForLoadState('networkidle', { timeout: 120000 });
-		console.log('Current URL:', global.page.url());
-		console.log('Test case passed');
 	}
 );

@@ -12,7 +12,16 @@ class gigapower extends StandardApp {
 		this.btnDismissNotifications = this.page.locator(
 			'//button[contains(@class, "notifications-btn-right") and contains(text(), "Dismiss")]'
 		);
-	
+		
+		this.homeBtn = this.page.locator(`//li[@title="Go to home bookmark"]`);
+
+		this.shareBtn = this.page.locator('#a-mapLink');
+		this.copyLinkBtn = this.page.locator('button.copy_link_btn');
+		// Textarea inside the Share Map dialog that holds the shareable URL
+		// DOM: <textarea class="core-map-link"></textarea>
+		this.shareLinkTextarea = this.page.locator('textarea.core-map-link');
+
+
 		this.tabBaseId = 'rc-tabs-2-tab-';
 
 		this.btnSaveDesign = this.page.locator(
@@ -160,6 +169,61 @@ class gigapower extends StandardApp {
 			'.myw-tools-palette-panel, .myw-side-panel, [class*="tools-palette"], [class*="side-panel"]'
 		).first();
 
+		// ─── Layers panel locators ───────────────────────────────────────────────
+		// Added for the @gpLayers scenario — open via "Layers" tab in the left pane,
+		// scroll to find the layer by name, then uncheck/recheck its toggle
+		// 09-04-26
+		// ─── Layers tab locator ───────────────────────────────────────────────────
+		// DOM: <ul class="tabControl_nav noselect">
+		//        <li class="background_tab">Details</li>
+		//        <li class="foreground_tab">Layers</li>   ← active tab has foreground_tab
+		//        <li class="background_tab">Help</li>
+		//      </ul>
+		// Use text match inside tabControl_nav so it works whether the tab is
+		// foreground_tab (active) or background_tab (inactive)
+		// 09-04-26
+		this.layersTab = this.page.locator('ul.tabControl_nav li').filter({ hasText: 'Layers' });
+
+		// ─── Layer row + toggle locators ─────────────────────────────────────────
+		// DOM (from browser inspect):
+		//   <li class="overlay-button ui-state-default layer-item-row [overlay-disabled]"
+		//       data-layer="testlayer">
+		//     <div>
+		//       <div class="layer-title-container">
+		//         <span class="overlay-button-name">
+		//           <label title="testing">Layer for test</label>
+		//         </span>
+		//       </div>
+		//     </div>
+		//     <span class="layer-checkbox-container"></span>  ← click to toggle
+		//   </li>
+		// When unchecked the <li> gets class "overlay-disabled".
+		// 09-04-26
+		// Exact text match via label:text-is() to avoid partial matches when layer
+		// names share common words (e.g. "test" matching "Layer for test")
+		// 09-04-26
+		this.layerRowByName = (layerName) =>
+			this.page.locator('li.layer-item-row').filter({
+				has: this.page.locator(`label:text-is("${layerName}")`)
+			}).first();
+		// Real checkbox inside the layer row:
+		//   <input type="checkbox" overlay_name="testlayer" class="layer-checkbox checkbox" checked>
+		// State is on the `checked` attribute — NOT on an overlay-disabled class on the li.
+		// 09-04-26
+		this.layerCheckboxInputByName = (layerName) =>
+			this.page.locator('li.layer-item-row').filter({
+				has: this.page.locator(`label:text-is("${layerName}")`)
+			}).locator('input.layer-checkbox').first();
+
+		// ─── Feature Palette locators ─────────────────────────────────────────────
+		// Added locators for the @gpFeaturePalette scenario
+		// Same pattern as toolsPaletteBtn / toolsPalettePanel above
+		// Harish, 08-04-26
+		this.featurePaletteBtn = this.page.locator(`//li[@title="Feature palette"]`);
+		this.featurePalettePanel = this.page.locator(
+			'.myw-feature-palette-panel, [class*="feature-palette"], [class*="feature-mode"]'
+		).first();
+
 		// ─── Create Design Exact locators ─────────────────────────────────────────
 		// Added for the new @gpCreateDesignExact scenario — pencil, design menu,
 		// name input and save button on the New Design panel
@@ -171,11 +235,78 @@ class gigapower extends StandardApp {
 		this.designNameInput = this.page.locator('input.text.ui-input');
 
 		this.saveDesignBtn = this.page.locator('button.ant-btn-primary.ant-btn-compact-first-item');
+
+		// Before: these locators were declared inline inside clickShowCurrentLocation() and isMapVisible()
+		// After: moved to constructor so they follow the same pattern as all other locators in this class
+		// Bhargavi, 06-04-26
+		this.showCurrentLocationBtn = this.page.locator(`//li[@title="Show current location"]`);
+		this.mapCanvasOrCanvas = this.page.locator('#map_canvas, canvas');
+
+		// Before: #text-search and .pac-item were declared inline inside searchAndSelectDesign()
+		//         and searchAndZoomToLocation()
+		// After : moved to constructor so all locators are maintained in one place
+		// Harish, 08-04-26
+		this.textSearch = this.page.locator('#text-search');
+		this.pacItem = this.page.locator('.pac-item');
+
+		// Added for searchAndSelectPlace() — first result item in the IQGeo search results panel
+		// Harish, 08-04-26
+		this.searchFirstResult = this.page.locator('.search-results li, .myw-result-list li, .result-item').first();
+
+		// Before: canvas nth(0) was declared inline inside drawPolygon() and draw4PointsOnCurrentView()
+		// After : moved to constructor
+		// Harish, 08-04-26
+		this.canvasNth0 = this.page.locator('canvas').nth(0);
+
+		// Before: Print map button was declared inline inside clickPrintMap()
+		// After : moved to constructor
+		// Harish, 08-04-26
+		this.printMapBtn = this.page.locator(`//li[@title="Print map"]`);
+
+		// Before: context menu items selector was declared inline inside clickGoCoordinatesMenuItem()
+		// After : moved to constructor
+		// Harish, 08-04-26
+		this.contextMenuItems = this.page.locator('ul.myw-context-menu li, .context-menu li, [role="menuitem"], .myw-popup li');
+
+		// Before: print form locators (#print-template-choice, #Title-text-area, #open-print)
+		//         were declared inline inside fillAndSubmitPrint()
+		// After : moved to constructor
+		// Harish, 08-04-26
+		this.printTemplateSelect = this.page.locator('#print-template-choice');
+		this.printTitleInput = this.page.locator('#Title-text-area');
+		this.printOpenBtn = this.page.locator('#open-print');
+
+		// ─── Select Bookmark locators ─────────────────────────────────────────────
+		// bookmark-item row by name — span.listBookmarkName inside li.bookmark-item
+		// zoom button scoped to the same li as the bookmark name to avoid strict mode
+		// violation when multiple bookmarks are visible (each has its own zoom button)
+		// Harish, 08-04-26
+		// Before: XPath ancestor traversal was used to scope both locators —
+		//         fragile because @class exact match failed and hidden form wasn't found
+		// After : Playwright filter() scopes the button to the correct bookmark li cleanly
+		// Harish, 08-04-26
+		this.bookmarkItemByName = (name) =>
+			this.page.locator('li.bookmark-item').filter({ hasText: name }).locator('span.listBookmarkName');
+		this.bookmarkZoomBtnByName = (name) =>
+			this.page.locator('li.bookmark-item').filter({ hasText: name }).locator('button.action_bookmarkZoom');
+	}
+
+	// Search for a place name in the IQGeo search box and click the first result
+	// Used by the @gpcreatebookmark scenario before clicking the bookmark button
+	// Harish, 08-04-26
+	async searchAndSelectPlace(placeName) {
+		await this.textSearch.click();
+		await this.textSearch.fill(placeName);
+		await this.page.waitForTimeout(500);
+		await this.textSearch.press('Enter');
+		await this.searchFirstResult.waitFor({ state: 'visible', timeout: 5000 });
+		await this.searchFirstResult.click();
+		await this.page.waitForLoadState('networkidle', { timeout: 8000 });
 	}
 
 		async searchAndSelectDesign(designName) {
-			await this.page.locator('#text-search').click();
-			await this.page.locator('#text-search').fill(designName);
+			await this.textSearch.click();
+			await this.textSearch.fill(designName);
 			await this.page.locator(`[title=" Design:  ${designName}"]`).click();
 			
 
@@ -188,12 +319,8 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	// Get the bounding box of the canvas
 	const canvasBoundingBox = await canvasLocator.boundingBox();
 	if (!canvasBoundingBox) {
-	  console.error('Could not get bounding box for the canvas element');
 	  return; // Exit if bounding box is not available
 	}
-  
-	// Log the canvas position for debugging
-	console.log(`Canvas Bounding Box: x=${canvasBoundingBox.x}, y=${canvasBoundingBox.y}, width=${canvasBoundingBox.width}, height=${canvasBoundingBox.height}`);
   
 	// Calculate position based on percentages
 	const xPosition = canvasBoundingBox.x + canvasBoundingBox.width * xPercentage;
@@ -201,10 +328,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
   
 	// Calculate the opposite position by mirroring along the X-axis
 	const oppositeX = (canvasBoundingBox.x + canvasBoundingBox.width) - (xPosition - canvasBoundingBox.x);
-  
-	// Log positions for debugging
-	console.log(`Placing cabinet at 30% width and 40% height: x=${xPosition}, y=${yPosition}`);
-	console.log(`Placing cabinet at the opposite side: x=${oppositeX}, y=${yPosition}`);
   
 	// Click on the calculated opposite position
 	await page.mouse.click(oppositeX, yPosition);
@@ -434,37 +557,31 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	 * Handle notification dialog
 	 * @param {*} page
 	 */
+	// Before: two waitForTimeout(50000) calls = 100s of dead waiting even when no dialog appeared
+	// After : check if the notification button is visible first (3s max), skip if not there
+	// Harish, 08-04-26
 	async handleNotificationDialog(page) {
-		// Handle any dialog that may appear
 		page.on('dialog', async (dialog) => {
-			console.log(`Dialog message: ${dialog.message()}`);
 			await dialog.dismiss();
 		});
 
 		if (page.isClosed()) {
-			console.error(
-				'Cannot handle notification dialog because the page is closed.'
-			);
 			return;
 		}
 
 		try {
-			await page.waitForTimeout(50000);
-			await this.btnReadLater.click();
-			await page.waitForTimeout(50000);
-
-			// Ensure that the dismiss button is no longer visible
-			await expect(this.btnReadLater).toBeVisible();
+			const isVisible = await this.btnReadLater.isVisible({ timeout: 3000 });
+			if (isVisible) {
+				await this.btnReadLater.click();
+			}
 		} catch (error) {
-			console.error('Error handling notification dialog:', error);
 		}
 	}
 	
 
 	async bottomNavTab(Tab) {
 		const tabXPath = `//div[span[@role='img' and @data-icon='environment'] and contains(text(), '${Tab}')]`;
-		console.log('Tab XPath:', tabXPath);  // Check the generated XPath
-		
+
 		await this.page.locator(tabXPath).click();
 	}
 	
@@ -495,7 +612,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 			'.feature-title.panel-title'
 		);
 		const designName = await designNameElement.innerText();
-		console.log('🚀👊 ~ file: mywcom.js:34 ~ designName:', designName);
 		expect(designName).toBe('Design: ' + args.designName);
 	}
 
@@ -518,12 +634,9 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 				.replace('*', '')
 				.trim();
 
-			console.log(`Searching for label: ${labelText}`); // Debugging
-
 			// Check if we have a corresponding input value in the mapping
 			if (Object.prototype.hasOwnProperty.call(arg, labelText)) {
 				const inputValue = arg[labelText];
-				console.log(`Filling in value for ${labelText}: ${inputValue}`); // Debugging
 
 				// Find the input associated with this label
 				const inputHandle = await labelElement.evaluateHandle((el) => {
@@ -550,9 +663,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 							await inputElement.selectOption({
 								value: inputValue,
 							});
-							console.log(
-								`Selected ${inputValue} for ${labelText}`
-							);
 						} else {
 							// If the input is disabled (like in your Est Completion Date case), enable it first
 							const isDisabled = await inputElement.evaluate(
@@ -563,10 +673,7 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 								await this.page.evaluate((inputElement) => {
 									inputElement.removeAttribute('disabled');
 								}, inputElement);
-								console.log(
-									`${labelText} input was disabled, now enabled.`
-								);
-							}
+						}
 
 							// If it’s a date picker (like 'Est Completion Date'), handle date selection
 							if (labelText === 'Est Completion Date') {
@@ -574,29 +681,16 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 								await this.page.click(
 									`a.ui-state-default:text("${inputValue}")`
 								);
-								console.log(
-									`Selected date: ${inputValue} for ${labelText}`
-								);
 							} else {
 								// Otherwise, fill the input field with the appropriate value
 								await inputElement.fill(inputValue);
-								console.log(
-									`Filled value for ${labelText}: ${inputValue}`
-								);
 							}
 						}
 					} else {
-						console.warn(
-							`Input element not found for label: ${labelText}`
-						);
 					}
 				} else {
-					console.warn(
-						`Input handle not found for label: ${labelText}`
-					);
 				}
 			} else {
-				console.warn(`No matching entry found for label: ${labelText}`);
 			}
 		}
 	}
@@ -623,7 +717,7 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	}
 
 // 	async drawPolygon(coordinates) {
-//   console.log('📍 Received coordinates:', coordinates);
+//   console.log(' Received coordinates:', coordinates);
 
 //   const canvas = this.page.locator('canvas').nth(0);
 //   await canvas.waitFor({ state: 'visible', timeout: 15000 });
@@ -642,14 +736,14 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 //     return [x + px * width, y + py * height];
 //   });
 
-//   console.log('🖱️ Clicking at pixel points:', points);
+//   console.log(' Clicking at pixel points:', points);
 
 //   for (let i = 0; i < points.length; i++) {
 //     const [clickX, clickY] = points[i];
 
 //     if (i === points.length - 1) {
 //       await this.page.mouse.dblclick(clickX, clickY);
-//       console.log(`✅ Double-click at (${clickX}, ${clickY})`);
+//       console.log(` Double-click at (${clickX}, ${clickY})`);
 //     } else {
 //       await this.page.mouse.click(clickX, clickY);
 //       console.log(`🔹 Click at (${clickX}, ${clickY})`);
@@ -657,13 +751,11 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 //     }
 //   }
 
-//   console.log('✅ Polygon drawing completed.');
+//   console.log(' Polygon drawing completed.');
 // }
 
 
 	async drawPolygon(coordinates) {
-    console.log('📍 Received coordinates:', coordinates);
-
     if (!coordinates || coordinates.length < 4) {
         throw new Error('Invalid coordinates provided for the polygon.');
     }
@@ -684,7 +776,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
             [[Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]],
             'EPSG:3857'
         );
-        console.log('Fitting map to extent:', extent);
         myw.app.map.getView().fit(extent, { size: myw.app.map.getSize(), maxZoom: 15 });
     }, parsed);
 
@@ -692,11 +783,10 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
     await this.page.waitForTimeout(4000);
 
     // Step 2: Get fresh canvas bounding box AFTER the map has settled
-    const canvas = this.page.locator('canvas').nth(0);
+    const canvas = this.canvasNth0;
     await canvas.waitFor({ state: 'visible', timeout: 15000 });
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Canvas bounding box not found after map load.');
-    console.log(`✅ Canvas ready — x:${Math.round(box.x)} y:${Math.round(box.y)} w:${box.width} h:${box.height}`);
 
     // Step 3: Click 4 positions forming a rectangle on the visible canvas.
     // page.mouse avoids DOM-detachment errors that elementHandle clicks cause when the
@@ -713,14 +803,11 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
         const [x, y] = points[i];
         if (i === points.length - 1) {
             await this.page.mouse.dblclick(x, y);
-            console.log(`✅ Double-click (close polygon) at (${Math.round(x)}, ${Math.round(y)})`);
         } else {
             await this.page.mouse.click(x, y);
-            console.log(`✅ Click point ${i + 1} at (${Math.round(x)}, ${Math.round(y)})`);
             await this.page.waitForTimeout(500);
         }
     }
-    console.log('✅ Polygon drawing completed.');
 }
 
 	// Before: drawPolygon() zoomed the map to hardcoded coordinates before clicking,
@@ -730,11 +817,10 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	//         directly on the current map view so the test always draws on visible land.
 	// Harish, 30-03-26
 	async draw4PointsOnCurrentView() {
-		const canvas = this.page.locator('canvas').nth(0);
+		const canvas = this.canvasNth0;
 		await canvas.waitFor({ state: 'visible', timeout: 15000 });
 		const box = await canvas.boundingBox();
 		if (!box) throw new Error('Canvas bounding box not found.');
-		console.log(`✅ Canvas — x:${Math.round(box.x)} y:${Math.round(box.y)} w:${box.width} h:${box.height}`);
 
 		const points = [
 			[box.x + box.width * 0.3, box.y + box.height * 0.2],
@@ -747,14 +833,11 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 			const [x, y] = points[i];
 			if (i === points.length - 1) {
 				await this.page.mouse.dblclick(x, y);
-				console.log(`✅ Double-click (close polygon) at (${Math.round(x)}, ${Math.round(y)})`);
 			} else {
 				await this.page.mouse.click(x, y);
-				console.log(`✅ Click point ${i + 1} at (${Math.round(x)}, ${Math.round(y)})`);
 				await this.page.waitForTimeout(500);
 			}
 		}
-		console.log('✅ 4-point polygon drawn on current view.');
 	}
 
 	// ─── Shared setup ────────────────────────────────────────────────────────────
@@ -780,7 +863,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		// Before: no check after opening app, test just continued blindly
 		// After : assert URL is testapp.html so we know the right page loaded
 		await expect(this.page).toHaveURL(/testapp\.html/, { timeout: 10000 });
-		console.log('✅ Logged in and Network Manager opened:', this.page.url());
 	}
 
 	// ─── Toolbar actions ─────────────────────────────────────────────────────────
@@ -796,7 +878,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		await this.measurementToolBtn.click();
 		await this.page.waitForTimeout(2000);
 		await expect(this.measurementToolBtn).toBeVisible({ timeout: 5000 });
-		console.log('✅ Measurement tool clicked and is active in toolbar');
 	}
 
 
@@ -814,22 +895,20 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	 * @param {string} query - Place name to search, e.g. "Bangalore"
 	 */
 	async searchAndZoomToLocation(query) {
-		const searchBox = this.page.locator('#text-search');
+		const searchBox = this.textSearch;
 		await searchBox.waitFor({ state: 'visible', timeout: 10000 });
 		await searchBox.click();
 		await searchBox.clear();
 		await searchBox.fill(query);
 
 		// Wait for Google Places autocomplete dropdown to appear
-		const firstResult = this.page.locator('.pac-item').first();
+		const firstResult = this.pacItem.first();
 		try {
 			await firstResult.waitFor({ state: 'visible', timeout: 5000 });
 			await firstResult.click();
-			console.log(`✅ Search result clicked for: "${query}"`);
 		} catch {
 			// Fallback: press Enter if dropdown doesn't appear
 			await searchBox.press('Enter');
-			console.log(`✅ Pressed Enter to search for: "${query}"`);
 		}
 
 		// Wait for the map to pan and Google Maps tiles to fully paint
@@ -851,11 +930,10 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	 * @param {string}   startLocation - Searched first to zoom the map to a real area
 	 */
 	async drawMeasurement() {
-		const canvas = this.page.locator('#map_canvas');
+		const canvas = this.mapCanvas;
 		await canvas.waitFor({ state: 'visible', timeout: 15000 });
 		const box = await canvas.boundingBox();
 		expect(box).not.toBeNull();
-		console.log(`✅ Map canvas ready — width: ${box.width}, height: ${box.height}`);
 
 		// Click two random points in the upper area of the canvas (avoids the dialog panel).
 		// Hover before each click to activate the tool's mousemove handler.
@@ -866,16 +944,13 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		await this.page.mouse.move(point1X, clickY);
 		await this.page.waitForTimeout(300);
 		await this.page.mouse.click(point1X, clickY);
-		console.log(`✅ Click point 1 at (${Math.round(point1X)}, ${Math.round(clickY)})`);
 		await this.page.waitForTimeout(800);
 
 		await this.page.mouse.move(point2X, clickY);
 		await this.page.waitForTimeout(300);
 		await this.page.mouse.dblclick(point2X, clickY);
-		console.log(`✅ Double-click (finish) at (${Math.round(point2X)}, ${Math.round(clickY)})`);
 
 		await this.page.waitForTimeout(2000);
-		console.log('✅ Measurement drawing complete');
 	}
 
 	/**
@@ -919,11 +994,10 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		// upper area (35% height) to avoid the measurement dialog.
 		// fit() zooms so the coordinates are within the visible area; clicking at 25%/75%
 		// guarantees we measure across the zoomed-in region.
-		const canvas = this.page.locator('#map_canvas');
+		const canvas = this.mapCanvas;
 		await canvas.waitFor({ state: 'visible', timeout: 15000 });
 		const box = await canvas.boundingBox();
 		expect(box).not.toBeNull();
-		console.log(`✅ Canvas: ${box.width}×${box.height} at (${Math.round(box.x)}, ${Math.round(box.y)})`);
 
 		const clickY  = box.y + box.height * 0.35;
 		const point1X = box.x + box.width  * 0.25;
@@ -932,16 +1006,13 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		await this.page.mouse.move(point1X, clickY);
 		await this.page.waitForTimeout(300);
 		await this.page.mouse.click(point1X, clickY);
-		console.log(`✅ Click point 1 at (${Math.round(point1X)}, ${Math.round(clickY)})`);
 		await this.page.waitForTimeout(800);
 
 		await this.page.mouse.move(point2X, clickY);
 		await this.page.waitForTimeout(300);
 		await this.page.mouse.dblclick(point2X, clickY);
-		console.log(`✅ Double-click (finish) at (${Math.round(point2X)}, ${Math.round(clickY)})`);
 
 		await this.page.waitForTimeout(2000);
-		console.log('✅ Exact measurement drawing complete');
 	}
 
 	// Before: selector used a comma-separated list of fallback classes that often
@@ -965,10 +1036,8 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 				lengthValue,
 				`Measurement dialog is open but length is 0 — coordinates may not have been applied`
 			).toBeGreaterThan(0);
-			console.log(`✅ Exact measurement result — Length: ${lengthValue} ${lengthUnit}`);
 		} else {
 			expect(dialogText.trim().length).toBeGreaterThan(0);
-			console.log('✅ Measurement dialog visible — raw text:', dialogText.trim().substring(0, 120));
 		}
 	}
 
@@ -979,8 +1048,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		await expect(this.measurementToolDialog).toBeVisible({ timeout: 10000 });
 		await this.lengthUnitDropdown.selectOption({ label: unit });
 		await this.page.waitForTimeout(1000);
-		const selected = await this.lengthUnitDropdown.inputValue();
-		console.log(`✅ Length unit changed to: ${selected}`);
 	}
 
 	// Before: no initial map click — measurement/design mode started without a seed point
@@ -993,7 +1060,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		expect(box).not.toBeNull();
 		await this.page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.4);
 		await this.page.waitForTimeout(1000);
-		console.log('✅ Left-clicked on map to start measurement');
 	}
 
 	async rightClickOnMap() {
@@ -1002,7 +1068,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		expect(box).not.toBeNull();
 		await this.page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.4, { button: 'right' });
 		await this.page.waitForTimeout(1000);
-		console.log('✅ Right-clicked on map canvas');
 	}
 
 	// Before: looked for exact text "Coordinates" which didn't match the actual menu label
@@ -1011,18 +1076,15 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	//         to console to help debug selector mismatches
 	// Harish, 05-04-26
 	async clickGoCoordinatesMenuItem() {
-		const allItems = this.page.locator('ul.myw-context-menu li, .context-menu li, [role="menuitem"], .myw-popup li');
+		const allItems = this.contextMenuItems;
 		const count = await allItems.count();
 		for (let i = 0; i < count; i++) {
-			const text = await allItems.nth(i).textContent().catch(() => '');
-			console.log(`  context menu item [${i}]: "${text.trim()}"`);
+			await allItems.nth(i).textContent().catch(() => '');
 		}
 
 		await this.goCoordinatesMenuItem.waitFor({ state: 'visible', timeout: 10000 });
-		const itemText = await this.goCoordinatesMenuItem.textContent();
 		await this.goCoordinatesMenuItem.click();
 		await this.page.waitForTimeout(800);
-		console.log(`✅ Clicked context menu item: "${itemText.trim()}"`);
 	}
 
 	// Before: two separate methods — addFirstCoordinate() and addSecondCoordinate()
@@ -1046,7 +1108,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		const count = await this.coordinatesDialogInputs.count();
 		const lastLatField = this.coordinatesDialogInputs.nth(count - 2);
 		const existingValue = await lastLatField.inputValue();
-		console.log(`  current row count: ${count / 2}, last lat value: "${existingValue}"`);
 
 		if (existingValue !== '') {
 			// Last row is filled — click Add to create a new empty row
@@ -1063,7 +1124,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 
 		// Fill the last (now empty) row
 		const updatedCount = await this.coordinatesDialogInputs.count();
-		console.log(`  updated row count after add: ${updatedCount / 2}`);
 		const latField = this.coordinatesDialogInputs.nth(updatedCount - 2);
 		const lonField = this.coordinatesDialogInputs.nth(updatedCount - 1);
 		await latField.fill(lat);
@@ -1074,7 +1134,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 
 		await this.addCoordinatesBtn.click();
 		await this.page.waitForTimeout(800);
-		console.log(`✅ Added coordinate: lat=${lat}, lon=${lon}`);
 	}
 
 	// Before: addCoordinate() saw row 1 already had a value from the random map click
@@ -1097,41 +1156,37 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 
 		await this.addCoordinatesBtn.click();
 		await this.page.waitForTimeout(500);
-		console.log(`✅ Overwrote first coordinate: lat=${lat}, lon=${lon}`);
 	}
 
 	async closeCoordinatesDialog() {
 		await this.closeCoordinatesBtn.waitFor({ state: 'visible', timeout: 5000 });
 		await this.closeCoordinatesBtn.click();
 		await this.page.waitForTimeout(1000);
-		console.log('✅ Coordinates dialog closed');
 	}
 
 	/**
 	 * Click the Show Current Location button in the toolbar.
 	 */
 	async clickShowCurrentLocation() {
-		await this.page.locator(`//li[@title="Show current location"]`).click();
+		await this.showCurrentLocationBtn.click();
 		await this.page.waitForTimeout(3000);
 
-		// ✅ Assert: map canvas is still visible after clicking (no crash or blank screen)
-		const canvas = this.page.locator('#map_canvas, canvas');
+		//  Assert: map canvas is still visible after clicking (no crash or blank screen)
+		const canvas = this.mapCanvasOrCanvas;
 		await expect(canvas.first()).toBeVisible({ timeout: 10000 });
-		console.log('✅ Show Current Location clicked, map canvas still visible');
 	}
 
 	/**
 	 * Verify that the map canvas is visible (used after Show Current Location).
 	 */
 	async isMapVisible() {
-		const canvas = this.page.locator('#map_canvas, canvas');
+		const canvas = this.mapCanvasOrCanvas;
 
-		// ✅ Assert: map canvas is visible
+		//  Assert: map canvas is visible
 		await expect(canvas.first()).toBeVisible({ timeout: 15000 });
 
-		// ✅ Assert: page URL still points to the correct app (no unexpected redirect)
+		//  Assert: page URL still points to the correct app (no unexpected redirect)
 		await expect(this.page).toHaveURL(/testapp\.html/, { timeout: 5000 });
-		console.log('✅ Map is displaying current location, URL confirmed:', this.page.url());
 	}
 
 	// Before: clickPrintMap() waited for a new tab (popup) and returned it.
@@ -1145,12 +1200,11 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		// Capture the popup URL before it fully loads, then close it
 		const [popup] = await Promise.all([
 			this.page.context().waitForEvent('page', { timeout: 30000 }),
-			this.page.locator(`//li[@title="Print map"]`).click(),
+			this.printMapBtn.click(),
 		]);
 
 		const printUrl = popup.url() || await popup.waitForEvent('load').then(() => popup.url());
 		await popup.close();
-		console.log('✅ Print popup intercepted, URL:', printUrl);
 
 		// Navigate current page to the print URL — stays in one recording
 		await this.page.goto(printUrl, { waitUntil: 'networkidle', timeout: 60000 });
@@ -1159,7 +1213,6 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		const url = this.page.url();
 		expect(url).toContain('layout=print');
 		expect(url).toContain('testapp.html');
-		console.log('✅ Print page loaded in same tab:', url);
 		return this.page;
 	}
 
@@ -1168,26 +1221,22 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	 * @param {Page} printPage - the new tab returned by clickPrintMap()
 	 * @param {string} title   - the title to enter (default: 'Automation Print Test')
 	 */
-	async fillAndSubmitPrint(printPage, title = 'Automation Print Test') {
-		const templateSelect = printPage.locator('#print-template-choice');
-		await templateSelect.waitFor({ state: 'visible', timeout: 15000 });
+	async fillAndSubmitPrint(printPage, title = 'Automation Print Test') { // title should be given by user or random one
+		await this.printTemplateSelect.waitFor({ state: 'visible', timeout: 15000 });
 
 		// Before: no check if dropdown had options, selectOption could silently fail
 		// After : assert at least one valid option exists before selecting
-		const options = await templateSelect.locator('option').allTextContents();
+		const options = await this.printTemplateSelect.locator('option').allTextContents();
 		const validOption = options.find(o => o.trim() !== '');
 		expect(validOption).toBeDefined();
-		await templateSelect.selectOption({ label: validOption.trim() });
-		console.log('✅ Template selected:', validOption.trim());
+		await this.printTemplateSelect.selectOption({ label: validOption.trim() });
 
 		// Before: title was filled with no check that the value actually got typed
 		// After : assert inputValue() matches what was typed
-		const titleInput = printPage.locator('#Title-text-area');
-		await titleInput.waitFor({ state: 'visible', timeout: 10000 });
-		await titleInput.fill(title);
-		const enteredTitle = await titleInput.inputValue();
+		await this.printTitleInput.waitFor({ state: 'visible', timeout: 10000 });
+		await this.printTitleInput.fill(title);
+		const enteredTitle = await this.printTitleInput.inputValue();
 		expect(enteredTitle).toBe(title);
-		console.log('✅ Print title entered and confirmed:', enteredTitle);
 
 		// Before: #open-print was clicked immediately after filling the form —
 		//         the recording showed no visible pause on the filled form.
@@ -1197,12 +1246,13 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		await printPage.waitForTimeout(3000);
 
 		// fire-and-forget — window.print() suspends the page so we don't await it
-		printPage.locator('#open-print').click().catch(() => {});
+		this.printOpenBtn.click().catch(() => {
+			// window.print() freezes the page — Playwright throws here, silently ignored
+		});
 		await printPage.waitForTimeout(3000);
 
 		const url = printPage.url();
 		expect(url).toContain('layout=print');
-		console.log('✅ Print submitted, page URL confirmed:', url);
 	}
 
 	// ─── Tools Palette ────────────────────────────────────────────────────────
@@ -1213,15 +1263,128 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	async clickToolsPalette() {
 		await this.toolsPaletteBtn.click();
 		await this.page.waitForTimeout(2000);
-		console.log('✅ Tools Palette button clicked');
 	}
 
 	async isToolsPanelVisible() {
-		console.log('✅ Tools Palette panel step passed');
 	}
 
 	async verifyToolsPaletteOption(toolName) {
-		console.log(`✅ Tool step passed: "${toolName}"`);
+	}
+
+	// ─── Layers panel ────────────────────────────────────────────────────────
+	// Opens the Layers tab, scrolls the list to the named layer, and toggles
+	// its visibility. State is read from the "overlay-disabled" class on the
+	// <li> row — not from a real checkbox input.
+	// Harish-08-04-26
+	async clickLayersTab() {
+		await this.layersTab.waitFor({ state: 'visible', timeout: 10000 });
+		await this.layersTab.click();
+		await this.page.waitForTimeout(1500);
+	}
+
+	// Scroll the layers list until the named layer row is in view
+	async scrollToLayer(layerName) {
+		const row = this.layerRowByName(layerName);
+		await row.waitFor({ state: 'attached', timeout: 10000 });
+		await row.scrollIntoViewIfNeeded();
+		await this.page.waitForTimeout(500);
+	}
+
+	async uncheckLayer(layerName) {
+		const row = this.layerRowByName(layerName);
+		await row.waitFor({ state: 'attached', timeout: 10000 });
+		await row.scrollIntoViewIfNeeded();
+		const checkbox = this.layerCheckboxInputByName(layerName);
+		await checkbox.waitFor({ state: 'attached', timeout: 5000 });
+		const isChecked = await checkbox.isChecked();
+		if (isChecked) {
+			await checkbox.click({ force: true });
+		}
+		await this.page.waitForTimeout(3000); 
+	}
+
+	async recheckLayer(layerName) {
+		const row = this.layerRowByName(layerName);
+		await row.waitFor({ state: 'attached', timeout: 10000 });
+		await row.scrollIntoViewIfNeeded();
+		const checkbox = this.layerCheckboxInputByName(layerName);
+		await checkbox.waitFor({ state: 'attached', timeout: 5000 });
+		const isChecked = await checkbox.isChecked();
+		if (!isChecked) {
+			await checkbox.click({ force: true });
+		}
+		await this.page.waitForTimeout(3000); 
+	}
+
+	async isLayerUnchecked(layerName) {
+		const checkbox = this.layerCheckboxInputByName(layerName);
+		await expect(checkbox).not.toBeChecked({ timeout: 8000 });
+	}
+
+	async isLayerChecked(layerName) {
+		const checkbox = this.layerCheckboxInputByName(layerName);
+		await expect(checkbox).toBeChecked({ timeout: 8000 });
+	}
+
+	// ─── Feature Palette ──────────────────────────────────────────────────────
+	// ─── Share Map ───────────────────────────────────────────────────────────
+	// Reads the shareable URL from the textarea and clicks Copy
+	// 09-04-26
+	async clickShareMap() {
+		await this.shareBtn.click();
+		await this.page.waitForTimeout(2000);
+	}
+
+	async getShareableLink() {
+		await this.shareLinkTextarea.waitFor({ state: 'visible', timeout: 5000 });
+		return await this.shareLinkTextarea.inputValue();
+	}
+
+	async clickCopyLink() {
+		await this.copyLinkBtn.click();
+		await this.page.waitForTimeout(1000);
+	}
+
+	async openShareableLinkInNewTab(link) {
+		const newPage = await this.page.context().newPage();
+		await newPage.goto(link);
+		await newPage.waitForLoadState('networkidle', { timeout: 30000 });
+		await newPage.waitForTimeout(3000);
+	}
+
+	// Added clickFeaturePalette() and isFeaturePaletteVisible()
+	// for the @gpFeaturePalette scenario — same pattern as Tools Palette above
+	// Harish, 08-04-26
+	async clickFeaturePalette() {
+		await this.featurePaletteBtn.click();
+		await this.page.waitForTimeout(2000);
+	}
+
+	// ─── Select Bookmark ──────────────────────────────────────────────────────
+	// Added for the @gpselectbookmark scenario
+	// Harish, 08-04-26
+	// Before: 500ms wait wasn't enough for the hidden edit-form panel to reveal
+	//         after clicking the bookmark name
+	// After : wait for the zoom button inside that li to become visible before proceeding
+	// Harish, 08-04-26
+	async selectBookmarkByName(name) {
+		await this.bookmarkItemByName(name).waitFor({ state: 'visible', timeout: 5000 });
+		await this.bookmarkItemByName(name).click();
+		await this.bookmarkZoomBtnByName(name).waitFor({ state: 'visible', timeout: 5000 });
+	}
+
+	// Before: used a page-level locator that matched all zoom buttons — strict mode violation
+	// After : scoped to the li of the selected bookmark so only one button is matched
+	// Harish, 08-04-26
+	async clickBookmarkZoom(name) {
+		await this.bookmarkZoomBtnByName(name).waitFor({ state: 'visible', timeout: 5000 });
+		await this.bookmarkZoomBtnByName(name).click();
+		await this.page.waitForLoadState('networkidle', { timeout: 8000 });
+	}
+
+	async closeManageBookmarks() {
+		await this.btnCloseMangeBookmark.click();
+		await this.page.waitForTimeout(500);
 	}
 
 	// ─── Create Design Exact ──────────────────────────────────────────────────
@@ -1235,11 +1398,9 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 		await this.pencilBtn.waitFor({ state: 'attached', timeout: 10000 });
 		await this.pencilBtn.click({ force: true });
 		await this.page.waitForTimeout(2000);
-		console.log('✅ Pencil / Add Object clicked');
 
 		await this.designMenuItem.click();
 		await this.page.waitForTimeout(1000);
-		console.log('✅ Design selected from list');
 	}
 
 	/**
@@ -1249,20 +1410,17 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	 */
 	async enterDesignNameAndSave(name) {
 		await this.page.waitForSelector('text=New Design:', { timeout: 15000 });
-		console.log('✅ New Design form visible');
 
 		await this.page.evaluate((designName) => {
 			const input = document.querySelector('input.text.ui-input');
 			const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-			setter.call(input, designName);
+			setter.call(input, designName); // try using fillform method
 			input.dispatchEvent(new Event('input', { bubbles: true }));
 			input.dispatchEvent(new Event('change', { bubbles: true }));
 		}, name);
-		console.log('✅ Design name entered:', name);
 
 		await this.page.waitForTimeout(1000);
 		await this.saveDesignBtn.click();
-		console.log('✅ Save clicked');
 
 		await this.page.waitForLoadState('networkidle', { timeout: 120000 });
 	}

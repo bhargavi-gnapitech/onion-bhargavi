@@ -50,7 +50,6 @@ Given('User is in the Network manager application', { timeout: 300000 }, async f
   await global.page.locator('button.ant-btn-primary.ant-btn-compact-first-item').click();
   await global.page.waitForLoadState('networkidle', { timeout: 120000 });
 
-  console.log('✅ Logged in and design created');
 });
 
 When('User clicks on the Close button', { timeout: 60000 }, async function () {
@@ -62,7 +61,6 @@ When('User clicks on the Close button', { timeout: 60000 }, async function () {
   const closeBtn = global.page.locator('#clear-results').first();
   await closeBtn.waitFor({ state: 'visible', timeout: 20000 });
   await closeBtn.click();
-  console.log('✅ Close button clicked');
 });
 
 Then('The design should be closed', { timeout: 60000 }, async function () {
@@ -73,7 +71,6 @@ Then('The design should be closed', { timeout: 60000 }, async function () {
   await global.page.waitForLoadState('networkidle', { timeout: 30000 });
   const detailsPanel = global.page.locator('.feature-details, #feature-details, .feature-panel');
   await expect(detailsPanel.first()).not.toBeVisible({ timeout: 15000 });
-  console.log('✅ Design closed successfully');
 });
 
 
@@ -102,7 +99,6 @@ Given('User is in Network manager application', { timeout: 300000 }, async funct
   await global.page.waitForTimeout(5000);
 
   GigaPower = new gigapower(global.page);
-  console.log('✅ Logged in and map opened');
 
 });
 
@@ -114,17 +110,14 @@ When(
     // Click pencil (Add Object) button
     await global.page.locator('#a-createFeature').waitFor({ state: 'attached' });
     await global.page.locator('#a-createFeature').click({ force: true });
-    console.log('✅ Pencil / Add Object clicked');
     await global.page.waitForTimeout(2000);
 
     // Select "Design" from the Add Object list
     await global.page.locator("//li[normalize-space(text())='Design']").click();
-    console.log('✅ Design selected');
     await global.page.waitForTimeout(1000);
 
     // Draw polygon on the map using coordinates
     await GigaPower.drawPolygon(arg.design_coordinates);
-    console.log('✅ Polygon drawn');
 
     await global.page.waitForLoadState('networkidle', { timeout: 120000 });
 
@@ -135,12 +128,10 @@ When('User inputs the fields and clicks on Create', { timeout: 300000 }, async f
 
   // Wait for the New Design form to appear
   await global.page.waitForSelector('text=New Design:', { timeout: 15000 });
-  console.log('✅ New Design form appeared');
 
   // Fill the Name field
   const jobName = 'Job: ' + Math.random();
   await global.page.locator('input[name="name"], label:has-text("Name") + input, .myw-attribute-widget input').first().fill(jobName);
-  console.log('✅ Name filled:', jobName);
 
   // Select Pick dropdown - select first available option
   try {
@@ -150,15 +141,13 @@ When('User inputs the fields and clicks on Create', { timeout: 300000 }, async f
     const validOption = options.find(o => o.trim() !== '' && o.trim() !== 'Select...');
     if (validOption) {
       await pickDropdown.selectOption({ label: validOption.trim() });
-      console.log('✅ Pick selected:', validOption.trim());
     }
   } catch (e) {
-    console.log('ℹ️ Pick dropdown not found or not required, skipping...');
+    // Pick dropdown not present — not required
   }
 
   // Click Save
   await global.page.locator('//button[text()="Save"]').click();
-  console.log('✅ Save clicked');
 
   await global.page.waitForSelector(
     '//div[contains(@class, "feature-title")]',
@@ -172,5 +161,4 @@ When('User inputs the fields and clicks on Create', { timeout: 300000 }, async f
 });
 
 Then('New design is created', { timeout: 60000 }, async function () {
-  console.log('✅ New design created successfully');
 });

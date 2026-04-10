@@ -48,8 +48,6 @@ async function () {
   
   await GigaPower.btnAddObject.waitFor({ state: 'visible' });
   await GigaPower.btnAddObject.click();
-
-  console.log(" Add Object clicked");
 });
 
 
@@ -62,6 +60,4 @@ Then('Network manager application should be launched', { timeout: 300000 }, asyn
   await expect(mapCanvas.first()).toBeVisible({
     timeout: 180000
   });
-
-  console.log("Map launched successfully");
 });

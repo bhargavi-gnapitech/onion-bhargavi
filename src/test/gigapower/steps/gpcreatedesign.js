@@ -21,7 +21,6 @@ Given('User is logged in and opens the Network Manager', { timeout: 300000 }, as
   login = new LoginPage(global.page);
   await login.login(USERNAME, PASSWORD);
   await global.page.waitForLoadState('networkidle', { timeout: 120000 });
-  console.log('✅ Logged in');
 
   // Click test_app tile from index page
   index = new IndexPage(global.page);
@@ -31,7 +30,6 @@ Given('User is logged in and opens the Network Manager', { timeout: 300000 }, as
   await global.page.waitForTimeout(5000);
 
   GigaPower = new gigapower(global.page);
-  console.log('✅ test_app opened, map loaded');
 
 });
 
@@ -42,13 +40,11 @@ When('User clicks the pencil icon and selects Design', { timeout: 300000 }, asyn
   // Click pencil (Add Object) button
   await global.page.locator('#a-createFeature').waitFor({ state: 'attached' });
   await global.page.locator('#a-createFeature').click({ force: true });
-  console.log('✅ Pencil / Add Object clicked');
 
   await global.page.waitForTimeout(2000);
 
   // Select "Design" from the list
   await global.page.locator("//li[normalize-space(text())='Design']").click();
-  console.log('✅ Design selected from list');
 
   await global.page.waitForTimeout(1000);
 
@@ -77,7 +73,6 @@ When('User enters a name and saves the design', { timeout: 300000 }, async funct
 
   // Wait for New Design form
   await global.page.waitForSelector('text=New Design:', { timeout: 15000 });
-  console.log('✅ New Design form visible');
 
   // Fill Name field via JS to trigger proper input events
   savedDesignName = 'Design_' + Date.now();
@@ -88,13 +83,11 @@ When('User enters a name and saves the design', { timeout: 300000 }, async funct
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
   }, savedDesignName);
-  console.log('✅ Name entered:', savedDesignName);
 
   await global.page.waitForTimeout(1000);
 
   // Click Save button
   await global.page.locator('button.ant-btn-primary.ant-btn-compact-first-item').click();
-  console.log('✅ Save clicked');
 
   await global.page.waitForLoadState('networkidle', { timeout: 120000 });
 
@@ -112,7 +105,6 @@ Then('New design is created successfully', { timeout: 60000 }, async function ()
 
   // If save worked the "New Design:" dialog will be gone — wait for it to disappear
   await global.page.waitForSelector('text=New Design:', { state: 'hidden', timeout: 20000 });
-  console.log('✅ New Design form closed — design saved:', savedDesignName);
 
   // Dismiss any detail panel that may have opened
   await global.page.keyboard.press('Escape');

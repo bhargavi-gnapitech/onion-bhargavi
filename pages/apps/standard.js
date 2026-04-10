@@ -27,9 +27,14 @@ class StandardApp {
 		);
 
 		this.tabNavControl = this.page.locator('#tabControl_nav');
+
+		// Harish, 07-04-26: updated selector from 'button.save' to '.primary-btn' — matches the actual button class in the app
 		this.btnSaveDesign = this.page.locator(
-			'.feature-edit-actions button.save'
+			'.feature-edit-actions .primary-btn'
 		);
+
+		// Harish, 07-04-26: moved mapCanvas here from gigapower.js — shared across all app pages so belongs in base class
+		this.mapCanvas = this.page.locator('#map_canvas');
 		this.ipDesignName = this.page.locator(
 			'.feature-edit-input div[name="Name"] input.text.ui-input'
 		);
@@ -316,102 +321,60 @@ class StandardApp {
 
 	//---------------------------------------------------------------------
 
+	// Before: used console event trick to get pixel data from IQGeo internals — brittle and slow
+	// After : zooms map using myw.proj.toProjExtent then clicks via page.mouse — stable and faster
+	// Harish, 07-04-26: moved improved version from gigapower.js to base class so all apps inherit it
 	/**
-	 *
-	 * @param {*} coordinates of array what you want to click on a array
-	 *  example: coordinate--> array [X1,Y1,X2,Y2,X3,Y3,.......]
-	 * 
-	 * XMin,YMin,
-		XMin,YMax,
-		XMax,YMax,
-		XMax,YMin
-	 * 
-	 * const coordinates = [
-		'-111.78628481069823,33.29225943608999', // bottom-left
-		'-111.78628481069823,33.35866934425508', // top-left
-		'-111.86679399648924,33.35866934425508', // top-right
-		'-111.86679399648924,33.29225943608999'  // bottom-right
-		];
-	 *
-	 *  Created by: Mohanish Ravula
-	 *  Created on: 2024-08-04
+	 * Draw a 4-point polygon on the map canvas using lat/lon coordinates.
+	 * @param {string[]} coordinates - Array of "lon,lat" strings
 	 */
 	async drawPolygon(coordinates) {
-		console.log('🚀👊 ~ file: standard.js:290 ~ coordinates:', coordinates);
-		console.log('in drawpolygog');
-		const canvasLocator = await this.page.locator('canvas').nth(0);
-		await this.page.waitForSelector('canvas', { state: 'visible' });
-
-		if (!canvasLocator) {
-			throw new Error('Canvas element not found.');
+		if (!coordinates || coordinates.length < 4) {
+			throw new Error('Invalid coordinates provided for the polygon.');
 		}
 
-		const canvasElement = await canvasLocator.elementHandle();
+		// Parse lon/lat from "lon,lat" strings
+		const parsed = coordinates.map((coo) => {
+			const parts = coo.trim().split(',');
+			if (parts.length !== 2) throw new Error(`Invalid coordinate format: "${coo}"`);
+			return [parseFloat(parts[0]), parseFloat(parts[1])];
+		});
 
-		await this.page.evaluate((coordinates) => {
-			// myw.proj.toProjExtent([[77.3674185543975,12.729808627328708,77.93596103486625,13.327863911628171]],'EPSG:3857')
-			// myw.app.map.getProjection();
-			myw.app.map
-				.getView()
-				.fit([
-					parseFloat(coordinates[0].split(',')[0]),
-					parseFloat(coordinates[0].split(',')[1]),
-					parseFloat(coordinates[2].split(',')[0]),
-					parseFloat(coordinates[1].split(',')[1]),
-				]);
-		}, coordinates);
+		// Zoom map to the bounding extent of the coordinates using IQGeo's API
+		await this.page.evaluate((coords) => {
+			const lons = coords.map(c => c[0]);
+			const lats = coords.map(c => c[1]);
+			const extent = myw.proj.toProjExtent(
+				[[Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)]],
+				'EPSG:3857'
+			);
+			myw.app.map.getView().fit(extent, { size: myw.app.map.getSize(), maxZoom: 15 });
+		}, parsed);
 
-		// #fixMe-
-		await this.page.waitForTimeout(1000);
-		const msgPromise = this.page.waitForEvent('console');
-		await this.page.evaluate((coordinates) => {
-			let pxls_d = [];
+		// Wait for map tiles to render
+		await this.page.waitForTimeout(4000);
 
-			for (let i = 0; i < coordinates.length; i++) {
-				const coo = coordinates[i];
-				let pxls = myw.proj.toProjExtent([
-					parseFloat(coo.split(',')[0]),
-					parseFloat(coo.split(',')[1]),
-				]);
-				pxls_d.push(pxls);
-			}
-			console.log(pxls_d);
-		}, coordinates);
+		// Get fresh canvas bounding box after the map has settled
+		const canvas = this.page.locator('canvas').nth(0);
+		await canvas.waitFor({ state: 'visible', timeout: 15000 });
+		const box = await canvas.boundingBox();
+		if (!box) throw new Error('Canvas bounding box not found after map load.');
 
-		const msg = await msgPromise;
-		var pxldata = await msg.args()[0].jsonValue();
-		console.log(
-			'🚀👊 ~ file: standard.js:343 ~ pxldata:',
-			pxldata,
-			pxldata.length
-		);
-		debugger;
-		for (let i = 0; i < pxldata.length; i++) {
-			console.log(i);
-			const coord = pxldata[i];
+		// Click 4 positions forming a rectangle — page.mouse avoids DOM-detachment errors
+		const points = [
+			[box.x + box.width * 0.3, box.y + box.height * 0.3],  // top-left
+			[box.x + box.width * 0.7, box.y + box.height * 0.3],  // top-right
+			[box.x + box.width * 0.7, box.y + box.height * 0.7],  // bottom-right
+			[box.x + box.width * 0.3, box.y + box.height * 0.7],  // bottom-left (double-click to close)
+		];
 
-			console.log('🚀👊 ~ file: standard.js:351 ~ coord:', coord);
-			const x = coord[0];
-			const y = coord[1];
-			if (i === 3) {
-				// Double click on the last point to complete the polygon
-				await canvasElement.dblclick({
-					position: { x, y },
-					force: true,
-				});
-				console.log('???? ~ Double Click:', x, y, '|', i);
+		for (let i = 0; i < points.length; i++) {
+			const [x, y] = points[i];
+			if (i === points.length - 1) {
+				await this.page.mouse.dblclick(x, y);
 			} else {
-				// single click on other points
-				try {
-					await canvasElement.click({
-						position: { x, y },
-						force: true,
-					});
-					console.log('???? ~ Single Click', x, y, '|', i);
-					await this.page.waitForTimeout(500);
-				} catch (error) {
-					console.log(error);
-				}
+				await this.page.mouse.click(x, y);
+				await this.page.waitForTimeout(500);
 			}
 		}
 	}
@@ -423,66 +386,64 @@ class StandardApp {
 		await this.btnBookmarkTab.locator(`text="${button}"`).click();
 	}
 
+	// Before: used global.page instead of this.page, hardcoded "Phoenix", no null checks, no dropdown/date handling
+	// After : uses this.page, generic for any form, handles dropdowns/disabled inputs/date pickers
+	// Harish, 07-04-26: moved improved version from gigapower.js to base class so all apps inherit it
 	/**
-	 * This function is helped to fill the forms or edit the form data
-	 * 
-	 * @param {*} arg - we need to send fieldName and value to enter in the textarea or selections for respective fieldName
-	 * 
-	 * Example: designDetails: {
-		'Name*': 'Design: ' + Math.random(),
-		State: 'designing',
-	},
-	 * 
-	 *  Created by: Mohanish Ravula
-	 *  Created on: 2024-08-20
+	 * Fill a design form by matching label text to input values.
+	 * @param {Object} arg - Map of field label → value e.g. { 'Name': 'Design1', 'State': 'designing' }
 	 */
 	async fillForm(arg) {
-		// Select all the label elements
-		const labels = await this.page.$$(
-			'.feature-edit-container .field-name-display'
-		);
-		// Open the dropdown
-		// Select the "Phoenix" option from the Market dropdown
-			// const marketDropdown = await global.page.locator('select[name="Market"]');
-			// await marketDropdown.selectOption({ value: 'Phoenix' }).click();
-			// await page.selectOption('select[name="Market"]', 'Phoenix');
-			await global.page.click('select[name="Market"]');
-			await global.page.locator('select[name="Market"] >> text=Phoenix').click();
+		if (typeof arg !== 'object' || arg === null) {
+			throw new Error('Invalid argument provided to fillForm.');
+		}
 
-			// Wait for any updates after the selection (if applicable)
-			await global.page.waitForLoadState('networkidle', { timeout: 10000 });
+		const labels = await this.page.$$('.field-name-display');
 
-
-
-		// Loop over each label element
 		for (let i = 0; i < labels.length; i++) {
-			const labelElement = await labels[i];
+			const labelElement = labels[i];
 
-			// Get the label text (trim to remove extra spaces)
-			const labelText = (await labelElement.innerText()).trim();
+			// Strip '*' from required field labels and trim whitespace
+			const labelText = (
+				await (await labelElement.getProperty('innerText')).jsonValue()
+			)
+				.replace('*', '')
+				.trim();
 
-			// Check if we have a corresponding input value in the mapping
-			if (labelText in arg) {
-				const inputValue = await arg[labelText];
-				
+			if (Object.prototype.hasOwnProperty.call(arg, labelText)) {
+				const inputValue = arg[labelText];
 
-				// Find the input associated with this label
-				const inputElement = await labelElement.evaluateHandle((el) => {
-					// Traverse to the corresponding input element
-
-					return el.parentElement.querySelector(
-						'.feature-edit-input input, .feature-edit-input textarea, .feature-edit-input .ant-select-selection-search-input'
-					);
+				const inputHandle = await labelElement.evaluateHandle((el) => {
+					const parentDiv = el.closest('div').nextElementSibling;
+					return parentDiv
+						? parentDiv.querySelector(
+								'.feature-edit-input input, .feature-edit-input textarea, select'
+						  )
+						: null;
 				});
 
-				// Fill the input field with the appropriate value
-				await inputElement.fill(inputValue);
+				if (inputHandle) {
+					const inputElement = await inputHandle.asElement();
+					if (inputElement) {
+						const tagName = await inputElement.evaluate((el) => el.tagName);
 
-				// If it's a dropdown (like 'State' or 'Group'), you might need to click and select the item
-				// if (labelText === 'State' || labelText === 'Group') {
-				// 	await inputElement.click();
-				// 	await page.keyboard.press('Enter'); // Select the first option (you may need to refine this for specific selections)
-				// }
+						if (tagName.toLowerCase() === 'select') {
+							await inputElement.selectOption({ value: inputValue });
+						} else {
+							const isDisabled = await inputElement.evaluate((el) => el.disabled);
+							if (isDisabled) {
+								await this.page.evaluate((el) => el.removeAttribute('disabled'), inputElement);
+							}
+
+							if (labelText === 'Est Completion Date') {
+								await inputElement.click();
+								await this.page.click(`a.ui-state-default:text("${inputValue}")`);
+							} else {
+								await inputElement.fill(inputValue);
+							}
+						}
+					}
+				}
 			}
 		}
 	}

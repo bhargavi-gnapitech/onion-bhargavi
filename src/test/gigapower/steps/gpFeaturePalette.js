@@ -8,8 +8,8 @@ let GigaPower;
 let login;
 let index;
 
-// Harish, 06-04-26: replaced loginAndOpenNetworkManager() with direct LoginPage and IndexPage calls
-Given('User is in the Network Manager application for Measurement', { timeout: 300000 }, async function () {
+// Harish, 08-04-26
+Given('User is in the Network Manager application for Feature Palette', { timeout: 300000 }, async function () {
 	GigaPower = new gigapower(global.page);
 	await global.page.goto(PRE_UAT_URL);
 	login = new LoginPage(global.page);
@@ -21,14 +21,7 @@ Given('User is in the Network Manager application for Measurement', { timeout: 3
 	await global.page.waitForTimeout(5000);
 });
 
-When('User clicks on the Measurement tool', { timeout: 60000 }, async function () {
-	await GigaPower.clickMeasurementTool();
+When('User clicks on Feature Palette', { timeout: 60000 }, async function () {
+	await GigaPower.clickFeaturePalette();
 });
 
-When('User clicks on the map starting from one feature to another', { timeout: 60000 }, async function () {
-	await GigaPower.drawMeasurement();
-});
-
-Then('User should be able to view length and area in selected units', { timeout: 60000 }, async function () {
-	await GigaPower.isMeasurementResultVisible();
-});

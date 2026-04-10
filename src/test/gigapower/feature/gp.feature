@@ -63,9 +63,10 @@ Feature:TestCases in Gigapower Application
     @gpcreatebookmark
     Scenario:Create a New Bookmark in Gigapower Application in IQGEO
         Given User should in the Network manager application
-        When Select an area on map and click on Add and Manage Bookmarks
+        When User searches for place "mandya" and selects the first result
+        When User clicks on Add and Manage Bookmarks
         When Input the name of the bookmark and Save
-        Then A new bookmark must be added 
+        Then A new bookmark must be added
 
 # ---------------------------------------------------------------------------------------------
 
@@ -75,6 +76,15 @@ Feature:TestCases in Gigapower Application
         When User clicks on Manage bookmarks
         When select the feature to be opened and click on Go to button
         Then The selected bookmark is opened
+
+# ------------------------------------------------------------------------------------------
+
+    @gpSelectBookmark
+    Scenario: User should be able to select a bookmark and zoom to its location
+        Given User is in the Network Manager application for Select Bookmark
+        When User clicks on the star and opens Manage Bookmarks
+        When User selects bookmark "osaka" and clicks zoom
+        Then The map should navigate to the bookmarked location and dialog is closed
 
     # ------------------------------------------------------------------------------------------
 
@@ -408,6 +418,13 @@ Scenario: User should be able to view the added tools to the application in a si
 
 # ------------------------------------------------------------------------------------------
 
+@gpFeaturePalette
+Scenario: User should be able to view the Feature Palette panel in the application
+  Given User is in the Network Manager application for Feature Palette
+  When User clicks on Feature Palette
+
+# ------------------------------------------------------------------------------------------
+
 @gpToolsPaletteOptions
 Scenario: User should be able to verify each Tools Palette option works successfully
   Given User is in the Network Manager application for Tools Palette
@@ -417,6 +434,18 @@ Scenario: User should be able to verify each Tools Palette option works successf
   And User verifies "Multi Connect" tool is accessible
   And User verifies "Address Report" tool is accessible
   And User verifies "Requests" tool is accessible
+
+# ------------------------------------------------------------------------------------------
+
+@gpLayers
+Scenario: User should be able to uncheck and recheck a layer in the Layers panel
+  Given User is in the Network Manager application for Layers
+  When User clicks on the Layers tab
+  And User scrolls to find the layer "Layer for test"
+  When User unchecks the layer "Layer for test"
+  Then The layer "Layer for test" should be unchecked
+  When User checks the layer "Layer for test" again
+  Then The layer "Layer for test" should be checked
 
 # ------------------------------------------------------------------------------------------
 
@@ -443,7 +472,21 @@ Scenario: User should be able to create a design using exact coordinates
   And User closes the design coordinates dialog
   And User enters the design name "ExactDesign" and saves
   Then New design is created with exact coordinates successfully
-
+  And User searches for place "Bangalore" on the map
+# ------------------------------------------------------------------------------------------
+@gpHomePageBookmark
+Scenario: User should be able to see the Home page bookmark icon and navigate to the home page bookmark location
+  Given User is in the Network Manager application for Home Page Bookmark
+  When User clicks on the Home page bookmark icon
+  Then User should be able to see the Home page bookmark icon and navigate to the home page bookmark location
+  
+# ------------------------------------------------------------------------------------------
+@gpSharemap
+Scenario: User should be able to share the map using the share map option and verify the shared map link
+  Given User is in the Network Manager application for Share Map
+  When User clicks on the Share Map icon
+  Then User copies the shareable link
+  Then User should be able to open the shared map link in a new tab and see the same map view
 # ------------------------------------------------------------------------------------------
 
 @gpDebugMethods
