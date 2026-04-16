@@ -148,6 +148,21 @@ Feature:TestCases in Gigapower Application
 
  #--------------------------------------------------------------------------------------------  
 
+  @gpCheckConflict
+  Scenario: User should be able to run the app to check conflicts and display the issues
+    Given User is in the Network Manager application for Design Filter System
+    When User searches for design "design" in the map search
+    And User selects the searched design result
+    Then User clicks on "All" in the search category list
+    And User selects design "Design: 5" from results list
+    Then User clicks on the folder icon in design toolbar
+    When User clicks the Check Design button
+    And User checks the conflict options "Segments, Connections, Line Of Counts, Other"
+    And User selects the Start button
+    Then The app runs the conflict checks and displays the issues
+
+############################################################################################################################
+
     @gpcabinet
     Scenario: User should be able to download the fiber cabinet reports in the form of PDF, XLSX, CSV & HTML
     Given the user has signed in as "construction_director"
@@ -415,6 +430,7 @@ Scenario: User should be able to view the added tools to the application in a si
   Given User is in the Network Manager application for Tools Palette
   When User clicks on Tools Palette
   Then User should be able to view the added tools to the application in a side panel
+  And User selects tool "Spec Manager" from Tools Palette
 
 # ------------------------------------------------------------------------------------------
 
@@ -481,6 +497,23 @@ Scenario: User should be able to see the Home page bookmark icon and navigate to
   Then User should be able to see the Home page bookmark icon and navigate to the home page bookmark location
   
 # ------------------------------------------------------------------------------------------
+@gpDesignFilterSystem
+Scenario Outline: User should be able to filter the design using the design filter system and user options and see the filtered
+  Given User is in the Network Manager application for Design Filter <Option>
+  When User searches for design "design" in the map search
+  And User selects the searched design result
+  Then User clicks on "All" in the search category list
+  And User selects design "Design: 5" from results list
+  Then User clicks on the folder icon in design toolbar
+  Then User clicks on the listed bullet icon
+  Then User clicks on <Option> option
+
+  Examples:
+    | Option |
+    
+    | User   |
+
+# ------------------------------------------------------------------------------------------ 
 @gpSharemap
 Scenario: User should be able to share the map using the share map option and verify the shared map link
   Given User is in the Network Manager application for Share Map
@@ -488,6 +521,17 @@ Scenario: User should be able to share the map using the share map option and ve
   Then User copies the shareable link
   Then User should be able to open the shared map link in a new tab and see the same map view
 # ------------------------------------------------------------------------------------------
+
+@gpGenBOM
+Scenario: User should be able to generate BOM report from design
+  Given User is in the Network Manager application for Design Filter System
+  When User searches for design "design" in the map search
+  And User selects the searched design result
+  Then User clicks on "All" in the search category list
+  And User selects design "Design: 5" from results list
+  Then User clicks on the folder icon in design toolbar
+  Then User clicks on Generate BOM report
+  And Close the BOM report dialog
 
 @gpDebugMethods
 Scenario: Debug gigapower page object methods

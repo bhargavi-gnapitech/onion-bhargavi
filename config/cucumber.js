@@ -26,6 +26,7 @@ module.exports = {
 			'html:test-results/cucumber-report.html',
 			'json:test-results/cucumber-report.json',
 			'rerun:@rerun.txt',
+			'allure-cucumberjs/reporter', // Add allure-cucumberjs reporter for Allure integration
 		],
 
 		formatOptions: {
@@ -60,5 +61,3 @@ module.exports = {
 	},
 };
 
-// Print tag used for debugging
-console.log("Using tag:", process.env.npm_config_TAGS);

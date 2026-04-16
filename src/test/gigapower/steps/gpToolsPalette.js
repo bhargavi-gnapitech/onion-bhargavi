@@ -8,6 +8,10 @@ let GigaPower;
 let login;
 let index;
 
+async function selectToolFromToolsPalette(toolName) {
+	await GigaPower.verifyToolsPaletteOption(toolName);
+}
+
 // Harish, 06-04-26: replaced loginAndOpenNetworkManager() with direct LoginPage and IndexPage calls
 Given('User is in the Network Manager application for Tools Palette', { timeout: 300000 }, async function () {
 	GigaPower = new gigapower(global.page);
@@ -29,7 +33,12 @@ Then('User should be able to view the added tools to the application in a side p
 	await GigaPower.isToolsPanelVisible();
 });
 
+// Explicit selection step so the tool name can be passed directly from feature files
+When('User selects tool {string} from Tools Palette', { timeout: 60000 }, async function (toolName) {
+	await selectToolFromToolsPalette(toolName);
+});
+
 // SL 3B - Verifies each important tool is accessible inside the Tools Palette
 Then('User verifies {string} tool is accessible', { timeout: 60000 }, async function (toolName) {
-	await GigaPower.verifyToolsPaletteOption(toolName);
+	await selectToolFromToolsPalette(toolName);
 });

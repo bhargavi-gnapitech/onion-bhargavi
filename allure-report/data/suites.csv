@@ -1,0 +1,6 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","23637","User should be able to filter the design using the design filter system and user options and see the filtered","","2026-04-15","passed","2026-04-15","","","",""
+"","26329","User should be able to run the app to check conflicts and display the issues","","2026-04-16","passed","2026-04-16","","","",""
+"","25063","User should be able to generate BOM report from design","","2026-04-16","passed","2026-04-16","","","",""
+"","21280","User should be able to view the added tools to the application in a side panel","","2026-04-15","passed","2026-04-15","","","",""
+"","1434","User should be able to run the app to check the design and displays the issues","","2026-04-16","passed","2026-04-16","","","",""

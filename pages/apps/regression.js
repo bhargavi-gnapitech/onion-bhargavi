@@ -174,6 +174,8 @@ class Regression extends StandardApp {
 		this.startButton = this.page.locator(
 			'div.draggable-modal_button-container > button[value="start"]'
 		);
+		this.checkDesignCheckbox = (optionName) =>
+			this.page.getByRole('checkbox', { name: optionName });
 		this.secondElement = this.page.locator('.anticon.anticon-interaction').nth(2);
 		this.reSubmitButton = this.page.locator(
 			"//span[text()='Re-Submit']"
@@ -695,6 +697,13 @@ async  selectDropdownOptionByIndex(page, index, optionText) {
 		// Method to click on the 'Check design' button
 		async clickCheckDesign() {
 			await this.checkDesignIcon.click();
+		}
+		async selectCheckDesignOption(optionName) {
+			const option = this.checkDesignCheckbox(optionName);
+			await option.waitFor({ state: 'visible', timeout: 30000 });
+			if (!(await option.isChecked().catch(() => false))) {
+				await option.check({ force: true });
+			}
 		}
 		// Method to click on the 'Publish design' button
 		async clickPublishDesign() {

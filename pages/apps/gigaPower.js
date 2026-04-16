@@ -253,6 +253,27 @@ class gigapower extends StandardApp {
 		// Harish, 08-04-26
 		this.searchFirstResult = this.page.locator('.search-results li, .myw-result-list li, .result-item').first();
 
+		// Design filter system locators
+		// Added so @gpDesignFilterSystem selectors live in the page object constructor
+		this.designSuggestionRow = this.page.locator(
+			'//li[(contains(@class,"search-result") or contains(@class,"search-result-suggestion-item")) and .//span[contains(@class,"suggestion-item-label") and normalize-space()="Design"]]'
+		).first();
+		this.searchCategoryOptionsByName = (categoryName) =>
+			this.page.locator(
+				`//ul[contains(@class,"search-result-options")]//li[contains(@class,"search-result-option") and .//span[contains(@class,"suggestion-item-label") and normalize-space()="${categoryName}"]]`
+			);
+		this.designResultTitleByName = (designLabel) =>
+			this.page.locator(
+				`//div[contains(@class,"results-list")]//div[contains(@class,"result-title") and normalize-space()="${designLabel}"]`
+			).first();
+		this.designToolbarOpenIcon = this.page.locator('#delta-owner-tools li[title="Open"]').first();
+		this.designToolbarListBulletIcon = this.page.locator('#delta-owner-tools li.list-export').first();
+		this.designToolbarSystemOption = this.page.locator('#delta-owner-tools ul.sub-list-export li.delta-changes').first();
+		this.toolbarExpandIconContainer = this.page.locator('div.toolbar-expand-icon-container');
+		this.checkDesignIcon = this.page.locator('#watermark-toolbar li[title="Check design"]');
+		this.startButton = this.page.locator('div.draggable-modal_button-container > button[value="start"]');
+		this.checkDesignCheckbox = (optionName) => this.page.getByRole('checkbox', { name: optionName });
+
 		// Before: canvas nth(0) was declared inline inside drawPolygon() and draw4PointsOnCurrentView()
 		// After : moved to constructor
 		// Harish, 08-04-26
@@ -302,6 +323,252 @@ class gigapower extends StandardApp {
 		await this.searchFirstResult.waitFor({ state: 'visible', timeout: 5000 });
 		await this.searchFirstResult.click();
 		await this.page.waitForLoadState('networkidle', { timeout: 8000 });
+	}
+
+	async searchDesignInMapSearch(designName) {
+		await this.textSearch.waitFor({ state: 'visible', timeout: 30000 });
+		await this.textSearch.click();
+		await this.textSearch.fill('Design');
+		await this.page.waitForTimeout(500);
+		await this.textSearch.fill(designName);
+		await this.page.waitForTimeout(500);
+	}
+
+	async hoverDesignSuggestionRow() {
+		for (let attempt = 1; attempt <= 3; attempt++) {
+			const row = this.designSuggestionRow;
+			await row.waitFor({ state: 'visible', timeout: 30000 });
+			try {
+				await row.hover();
+				return;
+			} catch (error) {
+				if (attempt === 3) {
+					throw error;
+				}
+				await this.page.waitForTimeout(300);
+			}
+		}
+	}
+
+	async clickSearchCategoryOption(categoryName) {
+		await this.hoverDesignSuggestionRow();
+		await this.page.waitForTimeout(300);
+
+		const popupItems = this.searchCategoryOptionsByName(categoryName);
+		const popupCount = await popupItems.count();
+		for (let i = 0; i < popupCount; i++) {
+			const candidate = popupItems.nth(i);
+			if (await candidate.isVisible().catch(() => false)) {
+				await candidate.click({ force: true });
+				return;
+			}
+		}
+
+		const fallbackOption = this.page
+			.locator(`//span[contains(@class,"suggestion-item-label") and normalize-space()="${categoryName}"]`)
+			.first();
+
+		await fallbackOption.waitFor({ state: 'visible', timeout: 30000 });
+		await fallbackOption.click({ force: true });
+	}
+
+	async selectDesignFromResultsList(designLabel) {
+		const designRow = this.designResultTitleByName(designLabel);
+		await designRow.waitFor({ state: 'visible', timeout: 30000 });
+		await designRow.click({ force: true });
+		await this.page.waitForTimeout(300);
+	}
+
+	async clickDesignToolbarOpenIcon() {
+		await this.designToolbarOpenIcon.waitFor({ state: 'visible', timeout: 30000 });
+		await this.designToolbarOpenIcon.click({ force: true });
+		await this.page.waitForTimeout(300);
+	}
+
+	async clickOpenButton() {
+		await this.clickDesignToolbarOpenIcon();
+	}
+
+	async clickDesignToolbarListBulletIcon() {
+		await this.designToolbarListBulletIcon.waitFor({ state: 'visible', timeout: 30000 });
+		await this.designToolbarListBulletIcon.click({ force: true });
+	}
+
+	async expandToolbar() {
+		await this.toolbarExpandIconContainer.click();
+	}
+
+	async clickCheckDesign() {
+		await this.checkDesignIcon.click();
+	}
+
+	async selectCheckDesignOption(optionName) {
+		const option = this.checkDesignCheckbox(optionName);
+		await option.waitFor({ state: 'visible', timeout: 30000 });
+		if (!(await option.isChecked().catch(() => false))) {
+			await option.check({ force: true });
+		}
+	}
+
+	async clickStartButton() {
+		await this.startButton.scrollIntoViewIfNeeded();
+		await this.startButton.click();
+	}
+
+	async handleDialogClose() {
+		await this.closeObject.click();
+		await this.page.waitForLoadState('networkidle', { timeout: 80000 });
+	}
+
+	async clickDesignToolbarSystemOption() {
+		await this.clickDesignToolbarSubMenuOption('System');
+	}
+
+	async clickDesignToolbarUserOption() {
+		await this.clickDesignToolbarSubMenuOption('User');
+	}
+
+	async uncheckAllConflictCheckboxes() {
+		try {
+			const allCheckboxes = this.page.locator('[class*="checkbox-container"] input[type="checkbox"]');
+			const count = await allCheckboxes.count().catch(() => 0);
+			if (count === 0) {
+				console.log('No checkboxes found to uncheck');
+				return;
+			}
+			for (let i = 0; i < count; i++) {
+				try {
+					const checkbox = allCheckboxes.nth(i);
+					const isChecked = await checkbox.isChecked().catch(() => false);
+					if (isChecked) {
+						await checkbox.click();
+						await this.page.waitForTimeout(100);
+					}
+				} catch (e) {
+					console.log(`Error unchecking checkbox ${i}:`, e.message);
+				}
+			}
+		} catch (e) {
+			console.log('Error in uncheckAllConflictCheckboxes:', e.message);
+		}
+	}
+
+	async checkConflictOptions(optionNames) {
+		// optionNames should be an array like ['Segments', 'Connections', 'Line Of Counts', 'Other']
+		// Uncheck everything except what's in optionNames (don't uncheck Conflicts)
+		const optionsToUncheck = ['Structures', 'Routes', 'Conduits', 'Conduit Runs', 'Equipment', 'Cables', 'Circuits'];
+		
+		// Uncheck unwanted options
+		for (const option of optionsToUncheck) {
+			const checkbox = this.page.getByRole('checkbox', { name: option }).first();
+			try {
+				await checkbox.uncheck({ force: true }).catch(() => {});
+				await this.page.waitForTimeout(100);
+			} catch (e) {}
+		}
+		
+		// Check wanted options
+		for (const option of optionNames) {
+			const checkbox = this.page.getByRole('checkbox', { name: option }).first();
+			try {
+				await checkbox.check({ force: true }).catch(() => {});
+				await this.page.waitForTimeout(100);
+			} catch (e) {}
+		}
+	}
+
+	async waitForConflictCheckComplete() {
+		// Just wait for a short time for the check to process
+		await this.page.waitForTimeout(5000);
+	}
+
+	async getConflictCheckboxState(optionName) {
+		const checkbox = this.page.getByRole('checkbox', { name: optionName });
+		return await checkbox.isChecked().catch(() => false);
+	}
+
+	async openCheckDesignDialog() {
+		// Click on the second list-export button in the toolbar
+		const listExportButtons = this.page.locator('#delta-owner-tools li.list-export');
+		const secondButton = listExportButtons.nth(1);
+		await secondButton.click();
+		await this.page.waitForTimeout(2000);
+		
+		// Click on Conflicts option that appears
+		const conflictsOption = this.page.locator('text=Conflicts').first();
+		await conflictsOption.click();
+		await this.page.waitForTimeout(2000);
+	}
+
+	async verifyConflictCheckboxStates(optionsToVerify) {
+		// optionsToVerify should be an array like ['Conflicts', 'Segments', 'Connections', 'Line Of Counts', 'Other']
+		for (const option of optionsToVerify) {
+			const checkbox = this.page.getByRole('checkbox', { name: option });
+			const isChecked = await checkbox.isChecked().catch(() => false);
+			console.log(`${option} checkbox is checked:`, isChecked);
+			
+			if (!isChecked) {
+				throw new Error(`${option} checkbox should be checked after running the check`);
+			}
+		}
+		
+		console.log('Conflict check completed successfully. All expected checkboxes remain checked.');
+	}
+
+	async clickGenerateBOMButton() {
+		// Click the Generate BOM report button in the toolbar
+		// This is an <li> element with title="Generate BOM report"
+		const bomButton = this.page.locator('li[title="Generate BOM report"]');
+		
+		try {
+			await bomButton.click();
+		} catch (e) {
+			console.log('Error clicking BOM button:', e.message);
+			// Try alternative selector
+			const altButton = this.page.locator('li[title*="BOM"]').first();
+			await altButton.click();
+		}
+	}
+
+	async closeDialogIfOpen() {
+		// Close any open dialog using the close button
+		try {
+			const closeBtn = this.closeObject;
+			if (await closeBtn.isVisible().catch(() => false)) {
+				await closeBtn.click();
+				await this.page.waitForTimeout(500);
+			}
+		} catch (e) {
+			console.log('No dialog to close or error closing dialog');
+		}
+	}
+
+	async clickDesignToolbarSubMenuOption(optionName) {
+		await this.designToolbarListBulletIcon.waitFor({ state: 'visible', timeout: 30000 });
+		await this.designToolbarListBulletIcon.hover();
+
+		const primaryOption = this.page.locator(`//ul[contains(@class,"sub-list-export")]//li[normalize-space()="${optionName}"]`).first();
+		if (await primaryOption.isVisible().catch(() => false)) {
+			await primaryOption.click({ force: true });
+			return;
+		}
+
+		const fallbackOption = this.page
+			.locator(`//li[normalize-space()="${optionName}"]`)
+			.first();
+		await fallbackOption.waitFor({ state: 'visible', timeout: 30000 });
+		await fallbackOption.click({ force: true });
+	}
+
+	async runDesignFilterToolbarFlow(optionName) {
+		await this.searchDesignInMapSearch('design');
+		await this.hoverDesignSuggestionRow();
+		await this.clickSearchCategoryOption('All');
+		await this.selectDesignFromResultsList('Design: 5');
+		await this.clickDesignToolbarOpenIcon();
+		await this.clickDesignToolbarListBulletIcon();
+		await this.clickDesignToolbarSubMenuOption(optionName);
+		await this.page.waitForTimeout(5000);
 	}
 
 		async searchAndSelectDesign(designName) {
@@ -1261,14 +1528,65 @@ async function performCanvasOperationAndSelectDate(page, xPercentage = 0.3, yPer
 	// Panel assertions kept as pass-through logs so the recording completes cleanly
 	// Harish, 05-04-26
 	async clickToolsPalette() {
-		await this.toolsPaletteBtn.click();
+		const titleButtonVisible = await this.toolsPaletteBtn.isVisible().catch(() => false);
+		if (titleButtonVisible) {
+			await this.toolsPaletteBtn.click();
+		} else {
+			await this.page.locator('#a-tools-mode').click();
+		}
 		await this.page.waitForTimeout(2000);
 	}
 
 	async isToolsPanelVisible() {
+		const sidePanelVisible = await this.toolsPalettePanel.isVisible().catch(() => false);
+		if (sidePanelVisible) {
+			await expect(this.toolsPalettePanel).toBeVisible({ timeout: 10000 });
+			return;
+		}
+
+		const firstToolOption = this.page.locator(
+			'li.palette-btn, .dialog-tooltip-container, .myw-side-panel li, .myw-tools-palette-panel li'
+		).first();
+		await expect(firstToolOption).toBeVisible({ timeout: 10000 });
 	}
 
 	async verifyToolsPaletteOption(toolName) {
+		const safeToolName = String(toolName || '').trim();
+		if (!safeToolName) {
+			throw new Error('Tool name was empty in verifyToolsPaletteOption()');
+		}
+
+		const escapedToolName = safeToolName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const toolRegex = new RegExp(`^\\s*${escapedToolName}\\s*$`, 'i');
+
+		const toolByPaletteRow = this.page
+			.locator('li.palette-btn')
+			.filter({ hasText: new RegExp(escapedToolName, 'i') })
+			.first();
+
+		const toolByDialogId = this.page
+			.locator('[id$="Dialog"].dialog-tooltip-container')
+			.filter({ hasText: new RegExp(escapedToolName, 'i') })
+			.first();
+
+		const toolBySidePanelRow = this.page
+			.locator('.myw-side-panel li, .myw-tools-palette-panel li')
+			.filter({ hasText: new RegExp(escapedToolName, 'i') })
+			.first();
+
+		const toolByExactText = this.page.getByText(toolRegex).first();
+
+		const candidates = [toolByPaletteRow, toolByDialogId, toolBySidePanelRow, toolByExactText];
+		for (const candidate of candidates) {
+			const visible = await candidate.isVisible().catch(() => false);
+			if (visible) {
+				await candidate.click({ force: true });
+				await this.page.waitForTimeout(1000);
+				return;
+			}
+		}
+
+		throw new Error(`Tools Palette option not found or not visible: ${safeToolName}`);
 	}
 
 	// ─── Layers panel ────────────────────────────────────────────────────────

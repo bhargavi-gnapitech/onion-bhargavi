@@ -3,6 +3,10 @@ const fs = require('fs');
 const { ONION_BACKEND_Domain } = require('./onion-backend/constants/constants');
 
 async function updateTestResults() {
+	if (process.env.ENABLE_ONION_RESULT_SYNC !== 'true') {
+		return;
+	}
+
 	let reportContent;
 	try {
 		const fileContent = fs.readFileSync(
